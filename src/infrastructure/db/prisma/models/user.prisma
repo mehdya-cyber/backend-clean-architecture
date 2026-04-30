@@ -1,0 +1,19 @@
+enum UserRole {
+    user
+    admin
+    super_admin
+}
+
+model User {
+    id           String   @id @default(cuid())
+    firstName    String
+    lastName     String
+    password     String
+    isActive     Boolean  @default(false)
+    email        String   @unique
+    items        Item[]
+    role         UserRole @default(user)
+    tokenVersion Int      @default(0)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+}
