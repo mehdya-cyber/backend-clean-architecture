@@ -20,6 +20,9 @@ type TEnv = {
   JWT_ACCESS_EXPIRES_IN: jwt.SignOptions["expiresIn"];
   JWT_REFRESH_EXPIRES_IN: jwt.SignOptions["expiresIn"];
   CORS_ORIGIN: string;
+  COOKIE_DOMAIN: string;
+  CSRF_SECRET: string;
+  SERVER_URL: string;
 };
 
 export const env: TEnv = {
@@ -35,4 +38,7 @@ export const env: TEnv = {
     "JWT_REFRESH_EXPIRES_IN",
   ) as jwt.SignOptions["expiresIn"],
   CORS_ORIGIN: requireEnv("CORS_ORIGIN"),
+  COOKIE_DOMAIN: requireEnv("COOKIE_DOMAIN"),
+  CSRF_SECRET: requireEnv("CSRF_SECRET"),
+  SERVER_URL: requireEnv("SERVER_URL"),
 };

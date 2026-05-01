@@ -7,6 +7,6 @@ export interface ITokenRepository {
     tokenHash: string,
     data: Partial<Omit<ITokenEntity, "tokenHash">>,
   ): Promise<ITokenEntity>;
-  revokeAll(userId: string, replacedBy: string | null): Promise<number>;
+  revokeAll(userId: string): Promise<number>;
   revokeFamilyTokens(familyId: string): Promise<number>;
 }

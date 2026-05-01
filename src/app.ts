@@ -12,17 +12,19 @@ import { errorMiddleware } from "./interface/http/middleware/error.middleware";
 export const app = express();
 
 app.use(helmet());
+app.use(cookieParser());
+
 app.use(
   cors({
     origin: [env.CORS_ORIGIN],
     credentials: true,
   }),
 );
+
 app.use(compression());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 
 app.get("/health", (_req, res) => {
   res.status(200).json({ ok: true });

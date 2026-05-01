@@ -9,10 +9,11 @@ import {
 } from "../../commands/auth/auth.command";
 import { randomUUID } from "crypto";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { JwtService } from "../../../core/utils/jwt";
+import { JwtService, TRefreshTokenPayload } from "../../../core/utils/jwt";
 import { HashService } from "../../../core/utils/hash";
 import { TokenEntity } from "../../../domain/entities/token/token.entity";
 import { injectable, inject } from "inversify";
+import { CSRFService } from "../../services/csrf.service";
 
 @injectable()
 export class AuthUseCases {
@@ -51,9 +52,11 @@ export class AuthUseCases {
 
     const accessToken = JwtService.signAccessToken(user);
 
-    const refreshToken = JwtService.signRefreshToken();
+    const refreshToken = JwtService.signRefreshToken(user, familyId);
 
     const hashToken = HashService.hashToken(refreshToken);
+
+    const csrfToken = CSRFService.generateToken(familyId);
 
     const refreshTokenEntity = new TokenEntity({
       id: randomUUID(),
@@ -72,7 +75,9 @@ export class AuthUseCases {
     await this.tokenRepository.save(refreshTokenEntity);
 
     return {
+      familyId,
       user,
+      csrfToken,
       accessToken,
       refreshToken,
     };
@@ -92,9 +97,11 @@ export class AuthUseCases {
     const familyId = HashService.randomTokenId();
 
     const accessToken = JwtService.signAccessToken(user);
-    const refreshToken = JwtService.signRefreshToken();
+    const refreshToken = JwtService.signRefreshToken(user, familyId);
 
     const tokenHash = HashService.hashToken(refreshToken);
+
+    const csrfToken = CSRFService.generateToken(familyId);
 
     await this.tokenRepository.save({
       id: randomUUID(),
@@ -111,7 +118,9 @@ export class AuthUseCases {
     });
 
     return {
+      familyId,
       user,
+      csrfToken,
       accessToken,
       refreshToken,
     };
@@ -126,10 +135,26 @@ export class AuthUseCases {
     userAgent: string | null;
     ipAddress: string | null;
   }) => {
+    let payload: TRefreshTokenPayload;
+
+    try {
+      payload = JwtService.verifyRefreshToken(
+        refreshToken,
+      ) as TRefreshTokenPayload;
+    } catch (error) {
+      throw new AppError("Invalid refresh token", 401);
+    }
+
     const hashToken = HashService.hashToken(refreshToken);
     const token = await this.tokenRepository.findByTokenHash(hashToken);
 
     if (!token) {
+      await this.tokenRepository.revokeFamilyTokens(payload.familyId);
+      throw new AppError("Refresh token reuse detected", 401);
+    }
+
+    if (token.userId !== payload.sub || token.familyId !== payload.familyId) {
+      await this.tokenRepository.revokeFamilyTokens(payload.familyId);
       throw new AppError("Invalid refresh token", 401);
     }
 
@@ -154,9 +179,15 @@ export class AuthUseCases {
       throw new AppError("User no longer exists", 404);
     }
 
+    if (user.tokenVersion !== payload.tokenVersion) {
+      await this.tokenRepository.revokeFamilyTokens(token.familyId);
+      throw new AppError("Session no longer valid", 401);
+    }
+
     const newAccessToken = JwtService.signAccessToken(user);
-    const newRefreshToken = JwtService.signRefreshToken();
+    const newRefreshToken = JwtService.signRefreshToken(user, token.familyId);
     const newHashToken = HashService.hashToken(newRefreshToken);
+    const newCsrfToken = CSRFService.generateToken(token.familyId);
 
     await this.tokenRepository.save({
       id: randomUUID(),
@@ -179,9 +210,11 @@ export class AuthUseCases {
     });
 
     return {
+      familyId: token.familyId,
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
       user,
+      csrfToken: newCsrfToken,
     };
   };
 
@@ -209,7 +242,7 @@ export class AuthUseCases {
     return true;
   };
 
-  logoutAll = async ({ userId, ip }: { userId: string; ip: string | null }) => {
+  logoutAll = async ({ userId }: { userId: string }) => {
     const user = await this.userRepository.findById(userId);
 
     if (!user) {
@@ -220,7 +253,7 @@ export class AuthUseCases {
 
     await this.userRepository.update(userId, user);
 
-    await this.tokenRepository.revokeAll(userId, ip);
+    await this.tokenRepository.revokeAll(userId);
 
     return true;
   };

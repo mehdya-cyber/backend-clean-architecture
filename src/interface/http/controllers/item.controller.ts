@@ -11,6 +11,8 @@ import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { AppError } from "../../../core/error/app-error";
 import { TParamsIdDto } from "../../../core/validation/params.validation";
+import { TItemParamsDto } from "../dtos/item/item-params.dto";
+import { TGetItemsCommand } from "../../../application/commands/item/item.command";
 
 @injectable()
 export class ItemController {
@@ -19,9 +21,20 @@ export class ItemController {
     public readonly itemUseCases: ItemUseCases,
   ) {}
 
-  getAllItems = tryCatchAsync(async (_req: Request, res: Response) => {
-    const items = await this.itemUseCases.getItemsUseCase();
-    const itemResponse = items.map((item) => ItemMapper.toItemResponse(item));
+  getAllItems = tryCatchAsync(async (req: Request, res: Response) => {
+    const query: TItemParamsDto = req.query;
+
+    const command: TGetItemsCommand = {
+      name: query.name,
+      sortBy: query.sortBy,
+      page: query.page,
+      limit: query.limit,
+    };
+
+    const items = await this.itemUseCases.getItemsUseCase(command);
+    const itemResponse = items.data.map((item) =>
+      ItemMapper.toItemResponse(item),
+    );
     return res.status(200).json({ success: true, data: itemResponse });
   });
 

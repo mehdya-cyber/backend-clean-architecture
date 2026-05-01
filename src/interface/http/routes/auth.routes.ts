@@ -26,7 +26,11 @@ export const createAuthRouter = () => {
     AuthController.register,
   );
 
-  authRouter.post("/refresh", AuthController.refresh);
+  authRouter.post(
+    "/refresh",
+    AuthMiddleware.requireCsrf,
+    AuthController.refresh,
+  );
 
   authRouter.post(
     "/login",
@@ -34,10 +38,11 @@ export const createAuthRouter = () => {
     AuthController.login,
   );
 
-  authRouter.post("/logout", AuthController.logout);
+  authRouter.post("/logout", AuthMiddleware.requireCsrf, AuthController.logout);
 
   authRouter.post(
     "/logout-all",
+    AuthMiddleware.requireCsrf,
     AuthMiddleware.requireAuth,
     AuthController.logoutAll,
   );

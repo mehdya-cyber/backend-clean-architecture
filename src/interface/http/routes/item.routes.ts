@@ -9,6 +9,7 @@ import { AuthMiddleware } from "../middleware/auth.middleware";
 import { container } from "../../../core/container/container";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { paramsIdDto } from "../../../core/validation/params.validation";
+import { itemParamsDto } from "../dtos/item/item-params.dto";
 
 export const createItemRouter = () => {
   const itemRouter = Router();
@@ -20,7 +21,12 @@ export const createItemRouter = () => {
     CONTAINER_TYPES.AuthMiddleware,
   );
 
-  itemRouter.get("/", AuthMiddleware.requireAuth, ItemController.getAllItems);
+  itemRouter.get(
+    "/",
+    validationMiddleware({ query: itemParamsDto }),
+    AuthMiddleware.requireAuth,
+    ItemController.getAllItems,
+  );
 
   itemRouter.post(
     "/",

@@ -4,6 +4,7 @@ import { IItemRepository } from "../../../domain/interfaces/item-repository.inte
 import {
   TCreateItemCommand,
   TUpdateItemCommand,
+  TGetItemsCommand,
 } from "../../commands/item/item.command";
 import { ItemEntity } from "../../../domain/entities/item/item.entity";
 import { randomUUID } from "crypto";
@@ -19,8 +20,8 @@ export class ItemUseCases {
     private userRepository: IUserRepository,
   ) {}
 
-  getItemsUseCase = async () => {
-    return this.itemRepository.findAll();
+  getItemsUseCase = async (query: TGetItemsCommand) => {
+    return this.itemRepository.findAll(query);
   };
 
   createItemUseCase = async (userId: string, data: TCreateItemCommand) => {

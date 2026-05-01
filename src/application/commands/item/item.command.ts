@@ -12,3 +12,10 @@ export type TUpdateItemCommand = {
   tags: string[] | undefined;
   price: number;
 };
+
+export type TGetItemsCommand = {
+  page: number;
+  limit: number;
+  name?: string;
+  sortBy?: "createdAt" | "name";
+};

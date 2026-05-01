@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../../core/error/app-error";
-import { JwtService } from "../../../core/utils/jwt";
+import { JwtService, TRefreshTokenPayload } from "../../../core/utils/jwt";
 import { IUserRepository } from "../../../domain/interfaces/user-repository.interface";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
+import { CSRFService } from "../../../application/services/csrf.service";
 
 type TAccessTokenPayload = {
   userId: string;
@@ -52,6 +53,39 @@ export class AuthMiddleware {
     } catch (error) {
       next(new AppError("Invalid or expired token", 401));
     }
+  };
+
+  requireCsrf = (req: Request, _res: Response, next: NextFunction) => {
+    const csrfHeader = req.headers["x-csrf-token"];
+    const refreshToken = req.cookies.refreshToken;
+    const csrfCookie = req.cookies.csrfToken;
+
+    if (!refreshToken) {
+      return next(new AppError("Missing refresh token", 401));
+    }
+
+    if (!csrfCookie || !csrfHeader) {
+      return next(new AppError("Missing CSRF token", 401));
+    }
+
+    if (csrfCookie !== csrfHeader) {
+      return next(new AppError("Invalid CSRF token", 401));
+    }
+
+    const payload: TRefreshTokenPayload = JwtService.verifyRefreshToken(
+      refreshToken,
+    ) as TRefreshTokenPayload;
+
+    const isValid = CSRFService.verifyToken(
+      csrfHeader as string,
+      payload.familyId,
+    );
+
+    if (!isValid) {
+      return next(new AppError("Invalid CSRF token", 401));
+    }
+
+    next();
   };
 
   requireRole = (...roles: string[]) => {

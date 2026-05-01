@@ -1,8 +1,16 @@
 import { ItemEntity } from "../../../../../domain/entities/item/item.entity";
-import { IItemRepository } from "../../../../../domain/interfaces/item-repository.interface";
-import { Item } from "../../generated/prisma/client";
+import {
+  FindItemsQuery,
+  IItemRepository,
+} from "../../../../../domain/interfaces/item-repository.interface";
+import { Item, Prisma } from "../../generated/prisma/client";
 import { prisma } from "../../../../../core/config/prisma";
 import { injectable } from "inversify";
+import { TPaginated } from "../../../../../core/types/paginated.type";
+import {
+  getPaginatedMeta,
+  getPaginationOffset,
+} from "../../../../../core/utils/paginated";
 
 @injectable()
 export class ItemRepository implements IItemRepository {
@@ -48,10 +56,34 @@ export class ItemRepository implements IItemRepository {
     return this.toEntity(item);
   };
 
-  findAll = async () => {
-    const items = await prisma.item.findMany();
+  findAll = async (
+    filters: FindItemsQuery,
+  ): Promise<TPaginated<ItemEntity>> => {
+    const { page, limit, name, sortBy, sortOrder } = filters;
 
-    return items.map((item) => this.toEntity(item));
+    const skip = getPaginationOffset(page, limit);
+
+    const where: Prisma.ItemWhereInput = {
+      ...(name && { name: { contains: name } }),
+      ...(sortBy && { [sortBy]: { gte: new Date() } }),
+    };
+
+    const [items, total] = await prisma.$transaction([
+      prisma.item.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          [sortBy || "createdAt"]: sortOrder,
+        },
+      }),
+      prisma.item.count({ where }),
+    ]);
+
+    return {
+      data: items.map((item) => this.toEntity(item)),
+      meta: getPaginatedMeta(page, limit, total),
+    };
   };
 
   update = async (id: string, data: Partial<Omit<ItemEntity, "id">>) => {

@@ -49,12 +49,12 @@ export class TokenRepository implements ITokenRepository {
     return token ? this.tokenMapper(token) : null;
   }
 
-  async revokeAll(userId: string, replacedBy: string | null): Promise<number> {
+  async revokeAll(userId: string): Promise<number> {
     const user = await prisma.refreshToken.updateMany({
       where: { userId, revokedAt: null },
       data: {
         revokedAt: new Date(),
-        replacedBy: replacedBy,
+        replacedBy: null,
       },
     });
     return user.count;
