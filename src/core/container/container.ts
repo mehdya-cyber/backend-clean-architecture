@@ -13,6 +13,10 @@ import { AuthController } from "../../interface/http/controllers/auth.controller
 import { ItemController } from "../../interface/http/controllers/item.controller";
 import { UserController } from "../../interface/http/controllers/user.controller";
 import { AuthMiddleware } from "../../interface/http/middleware/auth.middleware";
+import { IAuditLogRepository } from "../../domain/interfaces/audit-log-repository.interface";
+import { AuditLogRepository } from "../../infrastructure/db/prisma/repository/audit-log/audit-log.repository";
+import { ITransactionManager } from "../../core/interfaces/transaction-manager.interfaces";
+import { PrismaTransactionManager } from "../../infrastructure/db/prisma/prisma-transaction-manager";
 
 export const container = new Container();
 
@@ -32,6 +36,11 @@ container
   .to(TokenRepository)
   .inSingletonScope();
 
+container
+  .bind<IAuditLogRepository>(CONTAINER_TYPES.AuditLogRepository)
+  .to(AuditLogRepository)
+  .inSingletonScope();
+
 // USE CASES BINDINGS
 container.bind<AuthUseCases>(CONTAINER_TYPES.AuthUseCases).to(AuthUseCases);
 container.bind<ItemUseCases>(CONTAINER_TYPES.ItemUseCases).to(ItemUseCases);
@@ -49,3 +58,7 @@ container
   .inSingletonScope();
 
 // SERVICE BINDINGS
+container
+  .bind<ITransactionManager>(CONTAINER_TYPES.TransactionManager)
+  .to(PrismaTransactionManager)
+  .inSingletonScope();

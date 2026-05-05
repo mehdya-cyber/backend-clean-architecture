@@ -4,12 +4,14 @@ import { IItemRepository } from "../../../domain/interfaces/item-repository.inte
 import {
   TCreateItemCommand,
   TUpdateItemCommand,
-  TGetItemsCommand,
+  TItemsQueryCommand,
 } from "../../commands/item/item.command";
 import { ItemEntity } from "../../../domain/entities/item/item.entity";
 import { randomUUID } from "crypto";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
+import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
+import { ITransactionManager } from "../../../core/interfaces/transaction-manager.interfaces";
 
 @injectable()
 export class ItemUseCases {
@@ -18,45 +20,63 @@ export class ItemUseCases {
     private itemRepository: IItemRepository,
     @inject(CONTAINER_TYPES.UserRepository)
     private userRepository: IUserRepository,
+
+    @inject(CONTAINER_TYPES.AuditLogRepository)
+    private auditLogRepository: IAuditLogRepository,
+
+    @inject(CONTAINER_TYPES.TransactionManager)
+    private transactionManager: ITransactionManager,
   ) {}
 
-  getItemsUseCase = async (query: TGetItemsCommand) => {
+  getItemsUseCase = async (query: TItemsQueryCommand) => {
     return this.itemRepository.findAll(query);
   };
 
-  createItemUseCase = async (userId: string, data: TCreateItemCommand) => {
-    const user = await this.userRepository.findById(userId);
+  createItemUseCase = async (data: TCreateItemCommand) => {
+    return this.transactionManager.runInTransaction(async (tx) => {
+      const user = await this.userRepository.findById(data.userId);
 
-    if (!user) {
-      throw new AppError("User not found", 404);
-    }
+      if (!user) {
+        throw new AppError("User not found", 404);
+      }
 
-    const itemData = new ItemEntity({
-      id: randomUUID(),
-      name: data.name,
-      description: data.description || null,
-      tags: data.tags || [],
-      price: data.price,
-      userId: user.id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      const itemData = new ItemEntity({
+        id: randomUUID(),
+        name: data.name,
+        description: data.description || null,
+        tags: data.tags || [],
+        price: data.price,
+        userId: user.id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const item = await this.itemRepository.save(itemData);
+
+      await this.auditLogRepository.create(
+        {
+          actorId: data.userId,
+          action: "ITEM_CREATED",
+          entity: "item",
+          entityId: item.id,
+          metadata: {
+            itemId: item.id,
+            name: item.name,
+            price: item.price,
+            tags: item.tags,
+          },
+        },
+        tx,
+      );
+
+      return item;
     });
-
-    const item = await this.itemRepository.save(itemData);
-    return item;
   };
 
-  updateItemUseCase = async (
-    userId: string,
-    data: Partial<TUpdateItemCommand>,
-  ) => {
-    const item = await this.itemRepository.findById(data.id!);
+  updateItemUseCase = async (data: TUpdateItemCommand) => {
+    const item = await this.itemRepository.findById(data.id);
 
-    const user = await this.userRepository.findById(userId);
-
-    if (!userId) {
-      throw new AppError("User ID is required", 400);
-    }
+    const user = await this.userRepository.findById(data.userId);
 
     if (!user) {
       throw new AppError("User not found", 404);
@@ -68,19 +88,24 @@ export class ItemUseCases {
 
     const itemData = new ItemEntity({
       ...item,
-      ...data,
-      userId,
-      // id: data.id,
-      // name: data.name,
-      // description: data.description || null,
-      // tags: data.tags || null,
-      // price: data.price,
-      // userId: item.userId,
-      // createdAt: item.createdAt,
-      // updatedAt: new Date(),
+      ...data.patch,
+      userId: data.userId,
     });
 
-    const updatedItem = await this.itemRepository.update(userId, itemData);
+    await this.auditLogRepository.create({
+      actorId: data.userId,
+      action: "ITEM_UPDATED",
+      entity: "item",
+      entityId: item.id,
+      metadata: {
+        itemId: item.id,
+        name: item.name,
+        price: item.price,
+        tags: item.tags,
+      },
+    });
+
+    const updatedItem = await this.itemRepository.update(data.id, itemData);
     return updatedItem;
   };
 }

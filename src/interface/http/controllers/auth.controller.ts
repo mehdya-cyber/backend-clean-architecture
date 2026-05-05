@@ -3,8 +3,8 @@ import { Request, Response } from "express";
 import { AuthUseCases } from "../../../application/use-cases/auth/auth.use-cases";
 import { AuthMapper } from "../../mappers/auth.mapper";
 import {
-  TLoginRequestDto,
-  TRegisterRequestDto,
+  loginRequestDto,
+  registerRequestDto,
 } from "../dtos/auth/auth-request.dto";
 import {
   TLoginCommand,
@@ -24,7 +24,7 @@ export class AuthController {
   ) {}
 
   login = tryCatchAsync(async (req: Request, res: Response) => {
-    const dto: TLoginRequestDto = req.body;
+    const dto = loginRequestDto.parse(req.body);
 
     const { ip, userAgent } = getRequestMeta(req);
 
@@ -47,7 +47,7 @@ export class AuthController {
   });
 
   register = tryCatchAsync(async (req: Request, res: Response) => {
-    const dto: TRegisterRequestDto = req.body;
+    const dto = registerRequestDto.parse(req.body);
     const { ip, userAgent } = getRequestMeta(req);
 
     const command: TRegisterCommand = {

@@ -30,15 +30,15 @@ export const createItemRouter = () => {
 
   itemRouter.post(
     "/",
-    AuthMiddleware.requireAuth,
     validationMiddleware({ body: createItemRequestDto }),
+    AuthMiddleware.requireAuth,
     ItemController.createItem,
   );
 
   itemRouter.patch(
     "/:id",
-    AuthMiddleware.requireAuth,
     validationMiddleware({ body: updateItemRequestDto, params: paramsIdDto }),
+    AuthMiddleware.requireAuth,
     ItemController.updateItem,
   );
 

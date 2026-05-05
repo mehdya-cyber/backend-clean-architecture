@@ -3,12 +3,12 @@ import jwt from "jsonwebtoken";
 
 dotenv.config();
 
-export const requireEnv = (key: string): string => {
+export const requireEnv = <T>(key: string): T => {
   const value = process.env[key];
   if (!value) {
     throw new Error(`Environment variable ${key} is not defined`);
   }
-  return value;
+  return value as T;
 };
 
 type TEnv = {
@@ -23,6 +23,7 @@ type TEnv = {
   COOKIE_DOMAIN: string;
   CSRF_SECRET: string;
   SERVER_URL: string;
+  LOG_LEVEL: "info" | "debug" | "warn" | "error";
 };
 
 export const env: TEnv = {
@@ -41,4 +42,5 @@ export const env: TEnv = {
   COOKIE_DOMAIN: requireEnv("COOKIE_DOMAIN"),
   CSRF_SECRET: requireEnv("CSRF_SECRET"),
   SERVER_URL: requireEnv("SERVER_URL"),
+  LOG_LEVEL: requireEnv("LOG_LEVEL"),
 };

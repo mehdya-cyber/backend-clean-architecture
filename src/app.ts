@@ -2,14 +2,19 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
-import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import { router } from "./interface/http/routes";
 import { env } from "./core/config/env";
 import { notFoundMiddleware } from "./interface/http/middleware/not-found.middleware";
 import { errorMiddleware } from "./interface/http/middleware/error.middleware";
+import { httpLoggerMiddleware } from "./interface/http/middleware/http-logger.middleware";
+import { requestIdMiddleware } from "./interface/http/middleware/request-id.middleware";
 
 export const app = express();
+
+app.use(requestIdMiddleware);
+app.use(express.json());
+app.use(httpLoggerMiddleware);
 
 app.use(helmet());
 app.use(cookieParser());
@@ -22,8 +27,6 @@ app.use(
 );
 
 app.use(compression());
-app.use(morgan("dev"));
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/health", (_req, res) => {

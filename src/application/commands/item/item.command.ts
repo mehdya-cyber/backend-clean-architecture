@@ -3,19 +3,24 @@ export type TCreateItemCommand = {
   description: string | undefined;
   tags: string[] | undefined;
   price: number;
+  userId: string;
 };
 
 export type TUpdateItemCommand = {
   id: string;
-  name: string;
-  description: string | undefined;
-  tags: string[] | undefined;
-  price: number;
+  patch: {
+    name?: string;
+    description?: string | undefined;
+    tags?: string[] | undefined;
+    price?: number;
+  };
+  userId: string;
 };
 
-export type TGetItemsCommand = {
+export type TItemsQueryCommand = {
   page: number;
   limit: number;
   name?: string;
   sortBy?: "createdAt" | "name";
+  sortOrder?: "asc" | "desc";
 };

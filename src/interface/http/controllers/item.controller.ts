@@ -6,13 +6,12 @@ import {
   TCreateItemCommand,
   TUpdateItemCommand,
 } from "../../../application/commands/item/item.command";
-import { TCreateItemRequestDto } from "../dtos/item/item-request.dto";
+import { createItemRequestDto } from "../dtos/item/item-request.dto";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { AppError } from "../../../core/error/app-error";
-import { TParamsIdDto } from "../../../core/validation/params.validation";
-import { TItemParamsDto } from "../dtos/item/item-params.dto";
-import { TGetItemsCommand } from "../../../application/commands/item/item.command";
+import { paramsIdDto } from "../../../core/validation/params.validation";
+import { TItemsQueryCommand } from "../../../application/commands/item/item.command";
+import { itemParamsDto } from "../dtos/item/item-params.dto";
 
 @injectable()
 export class ItemController {
@@ -22,11 +21,12 @@ export class ItemController {
   ) {}
 
   getAllItems = tryCatchAsync(async (req: Request, res: Response) => {
-    const query: TItemParamsDto = req.query;
+    const query = itemParamsDto.parse(req.query);
 
-    const command: TGetItemsCommand = {
+    const command: TItemsQueryCommand = {
       name: query.name,
       sortBy: query.sortBy,
+      sortOrder: query.sortOrder,
       page: query.page,
       limit: query.limit,
     };
@@ -39,51 +39,45 @@ export class ItemController {
   });
 
   createItem = tryCatchAsync(async (req: Request, res: Response) => {
-    const dto: TCreateItemRequestDto = req.body;
+    const dto = createItemRequestDto.parse(req.body);
 
-    const userId = req.user?.userId;
-
-    if (!userId) {
-      throw new AppError("User ID is required", 401);
-    }
+    const userId = req.user!.userId;
 
     const command: TCreateItemCommand = {
       name: dto.name,
       description: dto.description,
       tags: dto.tags,
       price: dto.price,
+      userId,
     };
 
-    const item = await this.itemUseCases.createItemUseCase(userId, command);
+    const item = await this.itemUseCases.createItemUseCase(command);
     const itemResponse = ItemMapper.toItemResponse(item);
 
     return res.status(201).json({ success: true, data: itemResponse });
   });
 
-  updateItem = tryCatchAsync(
-    async (req: Request<TParamsIdDto>, res: Response) => {
-      const dto: TCreateItemRequestDto = req.body;
+  updateItem = tryCatchAsync(async (req: Request, res: Response) => {
+    const dto = createItemRequestDto.parse(req.body);
 
-      const { id } = req.params;
+    const { id } = paramsIdDto.parse(req.params);
 
-      const userId = req.user?.userId;
+    const userId = req.user!.userId;
 
-      if (!userId) {
-        throw new AppError("User ID is required", 401);
-      }
-
-      const command: TUpdateItemCommand = {
-        id,
+    const command: TUpdateItemCommand = {
+      id,
+      patch: {
         name: dto.name,
         description: dto.description,
         tags: dto.tags,
         price: dto.price,
-      };
+      },
+      userId,
+    };
 
-      const item = await this.itemUseCases.updateItemUseCase(userId, command);
-      const itemResponse = ItemMapper.toItemResponse(item);
+    const item = await this.itemUseCases.updateItemUseCase(command);
+    const itemResponse = ItemMapper.toItemResponse(item);
 
-      return res.status(200).json({ success: true, data: itemResponse });
-    },
-  );
+    return res.status(200).json({ success: true, data: itemResponse });
+  });
 }

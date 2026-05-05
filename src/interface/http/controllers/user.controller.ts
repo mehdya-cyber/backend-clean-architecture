@@ -2,11 +2,14 @@ import { Request, Response } from "express";
 import { tryCatchAsync } from "../../../core/utils/try-catch-async";
 import { UserUseCases } from "../../../application/use-cases/user/user.use-cases";
 import { UserMapper } from "../../mappers/user.mapper";
-import { TCreateUserRequestDto } from "../dtos/user/user-request.dto";
+import { createUserRequestDto } from "../dtos/user/user-request.dto";
 import { TCreateUserCommand } from "../../../application/commands/user/user.command";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { TParamsIdDto } from "../../../core/validation/params.validation";
+import {
+  paramsIdDto,
+  TParamsIdDto,
+} from "../../../core/validation/params.validation";
 
 @injectable()
 export class UserController {
@@ -16,7 +19,7 @@ export class UserController {
   ) {}
 
   getUser = tryCatchAsync(async (req: Request<TParamsIdDto>, res: Response) => {
-    const { id } = req.params;
+    const { id } = paramsIdDto.parse(req.params);
 
     const user = await this.userUseCases.getUserUseCase({
       id,
@@ -36,7 +39,7 @@ export class UserController {
   });
 
   createUser = tryCatchAsync(async (req: Request, res: Response) => {
-    const dto: TCreateUserRequestDto = req.body;
+    const dto = createUserRequestDto.parse(req.body);
 
     const command: TCreateUserCommand = {
       email: dto.email,

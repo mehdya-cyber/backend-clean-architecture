@@ -14,6 +14,7 @@ import { HashService } from "../../../core/utils/hash";
 import { TokenEntity } from "../../../domain/entities/token/token.entity";
 import { injectable, inject } from "inversify";
 import { CSRFService } from "../../services/csrf.service";
+import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
 
 @injectable()
 export class AuthUseCases {
@@ -23,6 +24,9 @@ export class AuthUseCases {
 
     @inject(CONTAINER_TYPES.TokenRepository)
     private readonly tokenRepository: ITokenRepository,
+
+    @inject(CONTAINER_TYPES.AuditLogRepository)
+    private readonly auditLogRepository: IAuditLogRepository,
   ) {}
 
   registerUseCase = async (data: TRegisterCommand) => {

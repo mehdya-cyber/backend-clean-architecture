@@ -19,7 +19,6 @@ export class CookieService {
   };
 
   static setRefreshToken = (res: Response, refreshToken: string) => {
-    console.log(this.BASE_COOKIE_OPTIONS);
     res.cookie("refreshToken", refreshToken, {
       ...this.BASE_COOKIE_OPTIONS,
       httpOnly: true,

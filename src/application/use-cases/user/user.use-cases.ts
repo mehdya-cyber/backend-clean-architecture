@@ -6,12 +6,15 @@ import { UserEntity } from "../../../domain/entities/user/user.entity";
 import { randomUUID } from "crypto";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
+import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
 
 @injectable()
 export class UserUseCases {
   constructor(
     @inject(CONTAINER_TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
+    @inject(CONTAINER_TYPES.AuditLogRepository)
+    private readonly auditLogRepository: IAuditLogRepository,
   ) {}
 
   getUserUseCase = async ({ id }: { id: string }) => {
@@ -44,6 +47,20 @@ export class UserUseCases {
       tokenVersion: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
+    });
+
+    await this.auditLogRepository.create({
+      actorId: userData.id,
+      action: "USER_CREATED",
+      entity: "user",
+      entityId: userData.id,
+      metadata: {
+        userId: userData.id,
+        email: userData.email,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        role: userData.role,
+      },
     });
 
     return this.userRepository.save(userData);

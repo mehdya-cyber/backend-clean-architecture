@@ -6,14 +6,19 @@ import {
 import { Item, Prisma } from "../../generated/prisma/client";
 import { prisma } from "../../../../../core/config/prisma";
 import { injectable } from "inversify";
-import { TPaginated } from "../../../../../core/types/paginated.type";
+import { TPaginated } from "../../../../../core/types/paginated.types";
 import {
   getPaginatedMeta,
   getPaginationOffset,
 } from "../../../../../core/utils/paginated";
+import { TransactionContext } from "../../../../../core/types/transaction-context.types";
+import { BasePrismaRepository } from "../../base-prisma-repository";
 
 @injectable()
-export class ItemRepository implements IItemRepository {
+export class ItemRepository
+  extends BasePrismaRepository
+  implements IItemRepository
+{
   private toEntity(item: Item): ItemEntity {
     return new ItemEntity({
       id: item.id,
@@ -38,8 +43,8 @@ export class ItemRepository implements IItemRepository {
 
     return this.toEntity(item);
   }
-  save = async (data: ItemEntity) => {
-    const item = await prisma.item.create({
+  save = async (data: ItemEntity, tx?: TransactionContext) => {
+    const item = await this.getClient(tx).item.create({
       data: {
         name: data.name,
         description: data.description,
@@ -64,8 +69,7 @@ export class ItemRepository implements IItemRepository {
     const skip = getPaginationOffset(page, limit);
 
     const where: Prisma.ItemWhereInput = {
-      ...(name && { name: { contains: name } }),
-      ...(sortBy && { [sortBy]: { gte: new Date() } }),
+      ...(name && { name: { contains: name, mode: "insensitive" } }),
     };
 
     const [items, total] = await prisma.$transaction([
@@ -74,7 +78,7 @@ export class ItemRepository implements IItemRepository {
         skip,
         take: limit,
         orderBy: {
-          [sortBy || "createdAt"]: sortOrder,
+          [sortBy || "createdAt"]: sortOrder || "desc",
         },
       }),
       prisma.item.count({ where }),

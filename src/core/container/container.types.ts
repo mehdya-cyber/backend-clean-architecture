@@ -3,6 +3,8 @@ export const CONTAINER_TYPES = {
   UserRepository: Symbol.for("UserRepository"),
   TokenRepository: Symbol.for("TokenRepository"),
   ItemRepository: Symbol.for("ItemRepository"),
+  AuditLogRepository: Symbol.for("AuditLogRepository"),
+  TransactionManager: Symbol.for("TransactionManager"),
 
   // USE CASES
   UserUseCases: Symbol.for("UserUseCases"),

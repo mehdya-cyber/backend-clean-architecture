@@ -8,6 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
+export type * from './models/AuditLog'
 export type * from './models/Item'
 export type * from './models/RefreshToken'
 export type * from './models/User'

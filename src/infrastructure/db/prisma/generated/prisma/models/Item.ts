@@ -433,14 +433,6 @@ export type ItemCreatetagsInput = {
   set: string[]
 }
 
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type ItemUpdatetagsInput = {
   set?: string[]
   push?: string | string[]
@@ -452,10 +444,6 @@ export type FloatFieldUpdateOperationsInput = {
   decrement?: number
   multiply?: number
   divide?: number
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type ItemCreateNestedManyWithoutUserInput = {

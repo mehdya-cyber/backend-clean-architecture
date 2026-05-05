@@ -1,4 +1,4 @@
-import { TPaginated } from "../../core/types/paginated.type";
+import { TPaginated } from "../../core/types/paginated.types";
 import { IItemEntity } from "../entities/item/item.entity";
 
 export type FindItemsQuery = {
@@ -11,10 +11,11 @@ export type FindItemsQuery = {
 
 export interface IItemRepository {
   findById(id: string): Promise<IItemEntity | null>;
-  save(data: IItemEntity): Promise<IItemEntity>;
+  save(data: IItemEntity, tx?: unknown): Promise<IItemEntity>;
   findAll(filters: FindItemsQuery): Promise<TPaginated<IItemEntity>>;
   update(
     id: string,
     data: Partial<Omit<IItemEntity, "id">>,
+    tx?: unknown,
   ): Promise<IItemEntity>;
 }
