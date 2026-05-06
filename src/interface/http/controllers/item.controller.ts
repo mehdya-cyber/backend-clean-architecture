@@ -4,20 +4,29 @@ import { ItemUseCases } from "../../../application/use-cases/item/item.use-cases
 import { ItemMapper } from "../../mappers/item.mapper";
 import {
   TCreateItemCommand,
+  TItemBulkUploadCommand,
   TUpdateItemCommand,
 } from "../../../application/commands/item/item.command";
-import { createItemRequestDto } from "../dtos/item/item-request.dto";
+import {
+  createItemRequestDto,
+  TItemBulkUploadRowDto,
+} from "../dtos/item/item-request.dto";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { paramsIdDto } from "../../../core/validation/params.validation";
 import { TItemsQueryCommand } from "../../../application/commands/item/item.command";
 import { itemParamsDto } from "../dtos/item/item-params.dto";
+import { AppError } from "../../../core/error/app-error";
+import { FileParserService } from "../../../application/services/file-parser.service";
 
 @injectable()
 export class ItemController {
   constructor(
     @inject(CONTAINER_TYPES.ItemUseCases)
     public readonly itemUseCases: ItemUseCases,
+
+    @inject(CONTAINER_TYPES.FileParser)
+    public readonly fileParser: FileParserService,
   ) {}
 
   getAllItems = tryCatchAsync(async (req: Request, res: Response) => {
@@ -79,5 +88,29 @@ export class ItemController {
     const itemResponse = ItemMapper.toItemResponse(item);
 
     return res.status(200).json({ success: true, data: itemResponse });
+  });
+
+  bulkUploadItems = tryCatchAsync(async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
+    const file = req.file;
+    if (!file) {
+      throw new AppError("File is required", 400);
+    }
+
+    const rows = this.fileParser.parseCsv<TItemBulkUploadRowDto>(file.buffer);
+    const command: TItemBulkUploadCommand = {
+      fileName: file.originalname,
+      items: rows.map((row) => ({
+        name: row.name,
+        price: row.price,
+        tags:
+          typeof row.tags === "string" && row.tags ? row.tags.split("|") : [],
+      })),
+      userId,
+    };
+
+    const result = await this.itemUseCases.bulkUploadItemsUseCase(command);
+
+    return res.status(202).json({ success: true, data: result });
   });
 }

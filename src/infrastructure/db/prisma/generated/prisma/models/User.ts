@@ -258,6 +258,7 @@ export type UserWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   items?: Prisma.ItemListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  bulkUploads?: Prisma.BulkUploadListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -273,6 +274,7 @@ export type UserOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   items?: Prisma.ItemOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
+  bulkUploads?: Prisma.BulkUploadOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -291,6 +293,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   items?: Prisma.ItemListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
+  bulkUploads?: Prisma.BulkUploadListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -340,6 +343,7 @@ export type UserCreateInput = {
   updatedAt?: Date | string
   items?: Prisma.ItemCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  bulkUploads?: Prisma.BulkUploadCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -355,6 +359,7 @@ export type UserUncheckedCreateInput = {
   updatedAt?: Date | string
   items?: Prisma.ItemUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  bulkUploads?: Prisma.BulkUploadUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -370,6 +375,7 @@ export type UserUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ItemUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  bulkUploads?: Prisma.BulkUploadUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -385,6 +391,7 @@ export type UserUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ItemUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bulkUploads?: Prisma.BulkUploadUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -499,6 +506,20 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.UserUpdateWithoutAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutAuditLogsInput>
 }
 
+export type UserCreateNestedOneWithoutBulkUploadsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBulkUploadsInput, Prisma.UserUncheckedCreateWithoutBulkUploadsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBulkUploadsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutBulkUploadsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutBulkUploadsInput, Prisma.UserUncheckedCreateWithoutBulkUploadsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutBulkUploadsInput
+  upsert?: Prisma.UserUpsertWithoutBulkUploadsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutBulkUploadsInput, Prisma.UserUpdateWithoutBulkUploadsInput>, Prisma.UserUncheckedUpdateWithoutBulkUploadsInput>
+}
+
 export type UserCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutItemsInput, Prisma.UserUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutItemsInput
@@ -521,14 +542,6 @@ export type EnumUserRoleFieldUpdateOperationsInput = {
   set?: $Enums.UserRole
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type UserCreateWithoutAuditLogsInput = {
   id?: string
   firstName: string
@@ -541,6 +554,7 @@ export type UserCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ItemCreateNestedManyWithoutUserInput
+  bulkUploads?: Prisma.BulkUploadCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -555,6 +569,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.ItemUncheckedCreateNestedManyWithoutUserInput
+  bulkUploads?: Prisma.BulkUploadUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -585,6 +600,7 @@ export type UserUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ItemUpdateManyWithoutUserNestedInput
+  bulkUploads?: Prisma.BulkUploadUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -599,6 +615,83 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.ItemUncheckedUpdateManyWithoutUserNestedInput
+  bulkUploads?: Prisma.BulkUploadUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutBulkUploadsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  password: string
+  isActive?: boolean
+  email: string
+  role?: $Enums.UserRole
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ItemCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+}
+
+export type UserUncheckedCreateWithoutBulkUploadsInput = {
+  id?: string
+  firstName: string
+  lastName: string
+  password: string
+  isActive?: boolean
+  email: string
+  role?: $Enums.UserRole
+  tokenVersion?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.ItemUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+}
+
+export type UserCreateOrConnectWithoutBulkUploadsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutBulkUploadsInput, Prisma.UserUncheckedCreateWithoutBulkUploadsInput>
+}
+
+export type UserUpsertWithoutBulkUploadsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutBulkUploadsInput, Prisma.UserUncheckedUpdateWithoutBulkUploadsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutBulkUploadsInput, Prisma.UserUncheckedCreateWithoutBulkUploadsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutBulkUploadsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutBulkUploadsInput, Prisma.UserUncheckedUpdateWithoutBulkUploadsInput>
+}
+
+export type UserUpdateWithoutBulkUploadsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ItemUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+}
+
+export type UserUncheckedUpdateWithoutBulkUploadsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+  tokenVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ItemUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
 }
 
 export type UserCreateWithoutItemsInput = {
@@ -613,6 +706,7 @@ export type UserCreateWithoutItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutActorInput
+  bulkUploads?: Prisma.BulkUploadCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutItemsInput = {
@@ -627,6 +721,7 @@ export type UserUncheckedCreateWithoutItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutActorInput
+  bulkUploads?: Prisma.BulkUploadUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutItemsInput = {
@@ -657,6 +752,7 @@ export type UserUpdateWithoutItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auditLogs?: Prisma.AuditLogUpdateManyWithoutActorNestedInput
+  bulkUploads?: Prisma.BulkUploadUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutItemsInput = {
@@ -671,6 +767,7 @@ export type UserUncheckedUpdateWithoutItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutActorNestedInput
+  bulkUploads?: Prisma.BulkUploadUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -681,11 +778,13 @@ export type UserUncheckedUpdateWithoutItemsInput = {
 export type UserCountOutputType = {
   items: number
   auditLogs: number
+  bulkUploads: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | UserCountOutputTypeCountItemsArgs
   auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
+  bulkUploads?: boolean | UserCountOutputTypeCountBulkUploadsArgs
 }
 
 /**
@@ -712,6 +811,13 @@ export type UserCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.
   where?: Prisma.AuditLogWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountBulkUploadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BulkUploadWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -726,6 +832,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   items?: boolean | Prisma.User$itemsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  bulkUploads?: boolean | Prisma.User$bulkUploadsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -772,6 +879,7 @@ export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = run
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.User$itemsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>
+  bulkUploads?: boolean | Prisma.User$bulkUploadsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -782,6 +890,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     items: Prisma.$ItemPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
+    bulkUploads: Prisma.$BulkUploadPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1190,6 +1299,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   items<T extends Prisma.User$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bulkUploads<T extends Prisma.User$bulkUploadsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$bulkUploadsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BulkUploadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1667,6 +1777,30 @@ export type User$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.Internal
   take?: number
   skip?: number
   distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
+}
+
+/**
+ * User.bulkUploads
+ */
+export type User$bulkUploadsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BulkUpload
+   */
+  select?: Prisma.BulkUploadSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BulkUpload
+   */
+  omit?: Prisma.BulkUploadOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BulkUploadInclude<ExtArgs> | null
+  where?: Prisma.BulkUploadWhereInput
+  orderBy?: Prisma.BulkUploadOrderByWithRelationInput | Prisma.BulkUploadOrderByWithRelationInput[]
+  cursor?: Prisma.BulkUploadWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BulkUploadScalarFieldEnum | Prisma.BulkUploadScalarFieldEnum[]
 }
 
 /**

@@ -385,6 +385,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   AuditLog: 'AuditLog',
+  BulkUpload: 'BulkUpload',
   Item: 'Item',
   RefreshToken: 'RefreshToken',
   User: 'User'
@@ -403,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "auditLog" | "item" | "refreshToken" | "user"
+    modelProps: "auditLog" | "bulkUpload" | "item" | "refreshToken" | "user"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -478,6 +479,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.AuditLogCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    BulkUpload: {
+      payload: Prisma.$BulkUploadPayload<ExtArgs>
+      fields: Prisma.BulkUploadFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BulkUploadFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BulkUploadFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>
+        }
+        findFirst: {
+          args: Prisma.BulkUploadFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BulkUploadFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>
+        }
+        findMany: {
+          args: Prisma.BulkUploadFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>[]
+        }
+        create: {
+          args: Prisma.BulkUploadCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>
+        }
+        createMany: {
+          args: Prisma.BulkUploadCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BulkUploadCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>[]
+        }
+        delete: {
+          args: Prisma.BulkUploadDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>
+        }
+        update: {
+          args: Prisma.BulkUploadUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>
+        }
+        deleteMany: {
+          args: Prisma.BulkUploadDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BulkUploadUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BulkUploadUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>[]
+        }
+        upsert: {
+          args: Prisma.BulkUploadUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BulkUploadPayload>
+        }
+        aggregate: {
+          args: Prisma.BulkUploadAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBulkUpload>
+        }
+        groupBy: {
+          args: Prisma.BulkUploadGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BulkUploadGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BulkUploadCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BulkUploadCountAggregateOutputType> | number
         }
       }
     }
@@ -755,6 +830,22 @@ export const AuditLogScalarFieldEnum = {
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
+export const BulkUploadScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  totalRows: 'totalRows',
+  processedRows: 'processedRows',
+  failedRows: 'failedRows',
+  fileName: 'fileName',
+  errorInfo: 'errorInfo',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BulkUploadScalarFieldEnum = (typeof BulkUploadScalarFieldEnum)[keyof typeof BulkUploadScalarFieldEnum]
+
+
 export const ItemScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -892,6 +983,34 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
+ * Reference to a field of type 'Int[]'
+ */
+export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BulkUploadStatus'
+ */
+export type EnumBulkUploadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BulkUploadStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'BulkUploadStatus[]'
+ */
+export type ListEnumBulkUploadStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BulkUploadStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -923,20 +1042,6 @@ export type EnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'UserRole[]'
  */
 export type ListEnumUserRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'UserRole[]'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-/**
- * Reference to a field of type 'Int[]'
- */
-export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
     
 
 /**
@@ -1035,6 +1140,7 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   auditLog?: Prisma.AuditLogOmit
+  bulkUpload?: Prisma.BulkUploadOmit
   item?: Prisma.ItemOmit
   refreshToken?: Prisma.RefreshTokenOmit
   user?: Prisma.UserOmit

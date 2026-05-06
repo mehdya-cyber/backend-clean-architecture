@@ -9,6 +9,16 @@
 * 🟢 You can import this file directly.
 */
 
+export const BulkUploadStatus = {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED'
+} as const
+
+export type BulkUploadStatus = (typeof BulkUploadStatus)[keyof typeof BulkUploadStatus]
+
+
 export const UserRole = {
   user: 'user',
   admin: 'admin',

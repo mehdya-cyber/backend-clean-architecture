@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   AuditLog: 'AuditLog',
+  BulkUpload: 'BulkUpload',
   Item: 'Item',
   RefreshToken: 'RefreshToken',
   User: 'User'
@@ -84,6 +85,22 @@ export const AuditLogScalarFieldEnum = {
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+export const BulkUploadScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  totalRows: 'totalRows',
+  processedRows: 'processedRows',
+  failedRows: 'failedRows',
+  fileName: 'fileName',
+  errorInfo: 'errorInfo',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BulkUploadScalarFieldEnum = (typeof BulkUploadScalarFieldEnum)[keyof typeof BulkUploadScalarFieldEnum]
 
 
 export const ItemScalarFieldEnum = {

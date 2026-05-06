@@ -3,6 +3,8 @@ import { ItemController } from "../controllers/item.controller";
 import { validationMiddleware } from "../middleware/validation.middleware";
 import {
   createItemRequestDto,
+  // itemBulkUploadRequestDto,
+  // itemBulkUploadRequestDto,
   updateItemRequestDto,
 } from "../dtos/item/item-request.dto";
 import { AuthMiddleware } from "../middleware/auth.middleware";
@@ -10,6 +12,7 @@ import { container } from "../../../core/container/container";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { paramsIdDto } from "../../../core/validation/params.validation";
 import { itemParamsDto } from "../dtos/item/item-params.dto";
+import { uploadMiddleware } from "../middleware/upload.middleware";
 
 export const createItemRouter = () => {
   const itemRouter = Router();
@@ -40,6 +43,14 @@ export const createItemRouter = () => {
     validationMiddleware({ body: updateItemRequestDto, params: paramsIdDto }),
     AuthMiddleware.requireAuth,
     ItemController.updateItem,
+  );
+
+  itemRouter.post(
+    "/bulk-upload",
+    AuthMiddleware.requireAuth,
+    uploadMiddleware.single("file"),
+    // validationMiddleware({ file: itemBulkUploadRequestDto }),
+    ItemController.bulkUploadItems,
   );
 
   return itemRouter;

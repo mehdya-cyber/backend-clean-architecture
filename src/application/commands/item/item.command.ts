@@ -24,3 +24,22 @@ export type TItemsQueryCommand = {
   sortBy?: "createdAt" | "name";
   sortOrder?: "asc" | "desc";
 };
+
+export type TItemBulkUploadCommand = {
+  fileName: string;
+  items: {
+    name: string;
+    price: number;
+    tags: string[];
+  }[];
+  userId: string;
+};
+
+export type TProcessBulkUploadItemsCommand = {
+  bulkUploadId: string;
+  data: {
+    name: string;
+    price: number;
+    tags: string[];
+  }[];
+};

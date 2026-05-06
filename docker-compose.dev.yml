@@ -1,10 +1,28 @@
-# Docker Compose for Development
+# docker-compose.yml
 services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: migrate-dev
+    command: sh -c "npm run db:deploy"
+    env_file:
+      - .env
+    networks:
+      - prisma-network
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   app:
     build:
       context: .
       dockerfile: Dockerfile.dev
     container_name: app-dev
+    command: sh -c "npm run dev"
     ports:
       - "3000:3000"
     env_file:
@@ -18,7 +36,53 @@ services:
       - node_modules:/app/node_modules
     restart: unless-stopped
     depends_on:
-      postgres:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: worker-dev
+    command: sh -c "npm run worker:dev"
+    env_file:
+      - .env
+    tty: true
+    stdin_open: true
+    networks:
+      - prisma-network
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: scheduler-dev
+    command: sh -c "npm run scheduler:dev"
+    env_file:
+      - .env
+    tty: true
+    stdin_open: true
+    networks:
+      - prisma-network
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
         condition: service_healthy
 
   postgres:
@@ -34,13 +98,34 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-dev
+    env_file:
+      - .env
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - prisma-network
+    command: >
+      sh -c 'redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   prisma-studio:
     image: node:22-alpine
+    container_name: prisma-studio-dev
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
@@ -52,14 +137,13 @@ services:
     networks:
       - prisma-network
     depends_on:
-      postgres:
-        condition: service_healthy
-      app:
-        condition: service_started
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
   node_modules:
+  redis-data:
 
 networks:
   prisma-network:

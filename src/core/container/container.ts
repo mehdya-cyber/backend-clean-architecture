@@ -17,6 +17,14 @@ import { IAuditLogRepository } from "../../domain/interfaces/audit-log-repositor
 import { AuditLogRepository } from "../../infrastructure/db/prisma/repository/audit-log/audit-log.repository";
 import { ITransactionManager } from "../../core/interfaces/transaction-manager.interfaces";
 import { PrismaTransactionManager } from "../../infrastructure/db/prisma/prisma-transaction-manager";
+import { IBulkUploadRepository } from "../../domain/interfaces/bulk-upload-repository.interface";
+import { BulkUploadRepository } from "../../infrastructure/db/prisma/repository/bulk-upload/bulk-upload.repository";
+import { IQueueService } from "../../domain/interfaces/queue-service.interface";
+import { ItemsBulkUploadQueue } from "../../infrastructure/queues/instances";
+import {
+  FileParserService,
+  IFileParser,
+} from "../../application/services/file-parser.service";
 
 export const container = new Container();
 
@@ -41,6 +49,11 @@ container
   .to(AuditLogRepository)
   .inSingletonScope();
 
+container
+  .bind<IBulkUploadRepository>(CONTAINER_TYPES.BulkUploadRepository)
+  .to(BulkUploadRepository)
+  .inSingletonScope();
+
 // USE CASES BINDINGS
 container.bind<AuthUseCases>(CONTAINER_TYPES.AuthUseCases).to(AuthUseCases);
 container.bind<ItemUseCases>(CONTAINER_TYPES.ItemUseCases).to(ItemUseCases);
@@ -61,4 +74,13 @@ container
 container
   .bind<ITransactionManager>(CONTAINER_TYPES.TransactionManager)
   .to(PrismaTransactionManager)
+  .inSingletonScope();
+
+container
+  .bind<IQueueService>(CONTAINER_TYPES.QueueService)
+  .toConstantValue(ItemsBulkUploadQueue);
+
+container
+  .bind<IFileParser>(CONTAINER_TYPES.FileParser)
+  .to(FileParserService)
   .inSingletonScope();

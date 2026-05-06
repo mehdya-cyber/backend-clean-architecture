@@ -1,25 +1,138 @@
+# docker-compose.prod.yml
 services:
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    container_name: migrate-prod
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+    networks:
+      - app-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   app:
     build:
       context: .
       dockerfile: Dockerfile
+      target: production
     container_name: app-prod
+    command: node dist/server.js
     ports:
       - "3000:3000"
     env_file:
-      - .env
+      - .env.production
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+    networks:
+      - app-network
     restart: unless-stopped
     depends_on:
-      - postgres
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: worker-prod
+    command: node dist/worker.js
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "10"
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: scheduler-prod
+    command: node dist/scheduler.js
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "10"
+
   postgres:
     image: postgres:16
-    container_name: postgres
+    container_name: postgres-prod
+    env_file:
+      - .env.production
     ports:
       - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=app
+    networks:
+      - app-network
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-prod
+    env_file:
+      - .env.production
+    command: >
+      sh -c 'redis-server --requirepass "$$REDIS_PASSWORD" --appendonly yes'
+    networks:
+      - app-network
+    volumes:
+      - redis_prod_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$$REDIS_PASSWORD", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_prod_data:
+  redis_prod_data:
+
+networks:
+  app-network:
+    name: app-network

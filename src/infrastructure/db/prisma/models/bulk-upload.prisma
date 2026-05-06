@@ -1,0 +1,25 @@
+enum BulkUploadStatus {
+    PENDING
+    PROCESSING
+    COMPLETED
+    FAILED
+}
+
+model BulkUpload {
+    id String @id @default(cuid())
+
+    userId        String
+    user          User             @relation(fields: [userId], references: [id])
+    totalRows     Int
+    processedRows Int              @default(0)
+    failedRows    Int              @default(0)
+    fileName      String
+    // payload Json
+    errorInfo     String?
+    status        BulkUploadStatus @default(PENDING)
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([userId])
+}

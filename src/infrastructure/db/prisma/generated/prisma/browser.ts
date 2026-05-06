@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type AuditLog = Prisma.AuditLogModel
 /**
+ * Model BulkUpload
+ * 
+ */
+export type BulkUpload = Prisma.BulkUploadModel
+/**
  * Model Item
  * 
  */

@@ -4,6 +4,7 @@ export const CONTAINER_TYPES = {
   TokenRepository: Symbol.for("TokenRepository"),
   ItemRepository: Symbol.for("ItemRepository"),
   AuditLogRepository: Symbol.for("AuditLogRepository"),
+  BulkUploadRepository: Symbol.for("BulkUploadRepository"),
   TransactionManager: Symbol.for("TransactionManager"),
 
   // USE CASES
@@ -20,4 +21,6 @@ export const CONTAINER_TYPES = {
   AuthMiddleware: Symbol.for("AuthMiddleware"),
 
   // SERVICES
+  QueueService: Symbol.for("QueueService"),
+  FileParser: Symbol.for("FileParser"),
 };

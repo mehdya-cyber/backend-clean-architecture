@@ -90,11 +90,35 @@ export class AuthUseCases {
   loginUseCase = async (data: TLoginCommand) => {
     const user = await this.userRepository.findByEmail(data.email);
     if (!user) {
+      await this.auditLogRepository.create({
+        actorId: null,
+        action: "LOGIN_FAILED",
+        entity: "user",
+        entityId: null,
+        metadata: {
+          email: data.email,
+          ipAddress: data.ipAddress,
+          userAgent: data.userAgent,
+          reason: "User not found",
+        },
+      });
       throw new AppError("Invalid Credentials", 401);
     }
 
     const isPasswordValid = await bcrypt.compare(data.password, user.password);
     if (!isPasswordValid) {
+      await this.auditLogRepository.create({
+        actorId: null,
+        action: "LOGIN_FAILED",
+        entity: "user",
+        entityId: null,
+        metadata: {
+          email: data.email,
+          ipAddress: data.ipAddress,
+          userAgent: data.userAgent,
+          reason: "Invalid password",
+        },
+      });
       throw new AppError("Invalid Credentials", 401);
     }
 
@@ -119,6 +143,17 @@ export class AuthUseCases {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       createdAt: new Date(),
       updatedAt: new Date(),
+    });
+
+    await this.auditLogRepository.create({
+      actorId: user.id,
+      action: "LOGIN_SUCCESS",
+      entity: "user",
+      entityId: user.id,
+      metadata: {
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+      },
     });
 
     return {

@@ -45,6 +45,11 @@ export { Prisma }
  */
 export type AuditLog = Prisma.AuditLogModel
 /**
+ * Model BulkUpload
+ * 
+ */
+export type BulkUpload = Prisma.BulkUploadModel
+/**
  * Model Item
  * 
  */

@@ -24,6 +24,10 @@ type TEnv = {
   CSRF_SECRET: string;
   SERVER_URL: string;
   LOG_LEVEL: "info" | "debug" | "warn" | "error";
+  // REDIS_URL: string;
+  REDIS_HOST: string;
+  REDIS_PORT: number;
+  REDIS_PASSWORD: string;
 };
 
 export const env: TEnv = {
@@ -43,4 +47,8 @@ export const env: TEnv = {
   CSRF_SECRET: requireEnv("CSRF_SECRET"),
   SERVER_URL: requireEnv("SERVER_URL"),
   LOG_LEVEL: requireEnv("LOG_LEVEL"),
+  // REDIS_URL: requireEnv("REDIS_URL"),
+  REDIS_HOST: requireEnv("REDIS_HOST"),
+  REDIS_PORT: Number(requireEnv("REDIS_PORT")),
+  REDIS_PASSWORD: requireEnv("REDIS_PASSWORD"),
 };

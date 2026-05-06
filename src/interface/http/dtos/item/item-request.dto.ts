@@ -27,5 +27,19 @@ export const updateItemRequestDto = itemRequestDto
   })
   .partial();
 
+export const itemBulkUploadRequestDto = z.object({
+  file: z.file(),
+});
+
+export const itemBulkUploadRowDto = z.object({
+  name: z.string(),
+  price: z.number(),
+  tags: z.string().optional(),
+});
+
 export type TCreateItemRequestDto = z.infer<typeof createItemRequestDto>;
 export type TUpdateItemRequestDto = z.infer<typeof updateItemRequestDto>;
+export type TItemBulkUploadRequestDto = z.infer<
+  typeof itemBulkUploadRequestDto
+>;
+export type TItemBulkUploadRowDto = z.infer<typeof itemBulkUploadRowDto>;

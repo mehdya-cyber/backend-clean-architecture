@@ -4,7 +4,6 @@ import { TransactionContext } from "../../../core/types/transaction-context.type
 import { prisma } from "../../../core/config/prisma";
 
 @injectable()
-// extends BasePrismaRepository
 export class PrismaTransactionManager implements ITransactionManager {
   runInTransaction<T>(
     callback: (tx: TransactionContext) => Promise<T>,

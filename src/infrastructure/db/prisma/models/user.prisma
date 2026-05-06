@@ -18,4 +18,6 @@ model User {
     updatedAt    DateTime @updatedAt
 
     auditLogs AuditLog[]
+
+    bulkUploads BulkUpload[]
 }
