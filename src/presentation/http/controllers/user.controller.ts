@@ -1,15 +1,12 @@
 import { Request, Response } from "express";
-import { tryCatchAsync } from "../../../core/utils/try-catch-async";
+import { tryCatchAsync } from "../helpers/try-catch-async";
 import { UserUseCases } from "../../../application/use-cases/user/user.use-cases";
 import { UserMapper } from "../../mappers/user.mapper";
 import { createUserRequestDto } from "../dtos/user/user-request.dto";
 import { TCreateUserCommand } from "../../../application/commands/user/user.command";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import {
-  paramsIdDto,
-  TParamsIdDto,
-} from "../../../core/validation/params.validation";
+import { paramsIdDto, TParamsIdDto } from "../../validation/params.validation";
 
 @injectable()
 export class UserController {

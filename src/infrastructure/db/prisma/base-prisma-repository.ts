@@ -1,4 +1,4 @@
-import { prisma } from "../../../core/config/prisma";
+import { prisma } from "./prisma";
 import { TransactionContext } from "../../../core/types/transaction-context.types";
 import { Prisma } from "./generated/prisma/client";
 

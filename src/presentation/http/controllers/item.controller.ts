@@ -1,4 +1,4 @@
-import { tryCatchAsync } from "../../../core/utils/try-catch-async";
+import { tryCatchAsync } from "../helpers/try-catch-async";
 import { Request, Response } from "express";
 import { ItemUseCases } from "../../../application/use-cases/item/item.use-cases";
 import { ItemMapper } from "../../mappers/item.mapper";
@@ -13,11 +13,11 @@ import {
 } from "../dtos/item/item-request.dto";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { paramsIdDto } from "../../../core/validation/params.validation";
+import { paramsIdDto } from "../../validation/params.validation";
 import { TItemsQueryCommand } from "../../../application/commands/item/item.command";
 import { itemParamsDto } from "../dtos/item/item-params.dto";
 import { AppError } from "../../../core/error/app-error";
-import { FileParserService } from "../../../application/services/file-parser.service";
+import { ICsvFileParser } from "../../../application/ports/file-parser.port";
 
 @injectable()
 export class ItemController {
@@ -26,7 +26,7 @@ export class ItemController {
     public readonly itemUseCases: ItemUseCases,
 
     @inject(CONTAINER_TYPES.FileParser)
-    public readonly fileParser: FileParserService,
+    public readonly csvFileParser: ICsvFileParser,
   ) {}
 
   getAllItems = tryCatchAsync(async (req: Request, res: Response) => {
@@ -97,7 +97,9 @@ export class ItemController {
       throw new AppError("File is required", 400);
     }
 
-    const rows = this.fileParser.parseCsv<TItemBulkUploadRowDto>(file.buffer);
+    const rows = this.csvFileParser.parseCsv<TItemBulkUploadRowDto>(
+      file.buffer,
+    );
     const command: TItemBulkUploadCommand = {
       fileName: file.originalname,
       items: rows.map((row) => ({

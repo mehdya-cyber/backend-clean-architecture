@@ -4,7 +4,7 @@ export interface IAuditLog {
   action: string;
   entity: string;
   entityId: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, unknown> | null;
   createdAt: Date;
   actor?: {
     id: string;
@@ -20,7 +20,7 @@ export class AuditLogEntity implements IAuditLog {
   action: string;
   entity: string;
   entityId: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, unknown> | null;
   createdAt: Date;
   actor?: {
     id: string;

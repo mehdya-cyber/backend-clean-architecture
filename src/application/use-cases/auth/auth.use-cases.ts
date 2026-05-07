@@ -1,32 +1,26 @@
 import { AppError } from "../../../core/error/app-error";
 import { ITokenRepository } from "../../../domain/interfaces/token-repository.interface";
 import { IUserRepository } from "../../../domain/interfaces/user-repository.interface";
-import bcrypt from "bcrypt";
 import { UserEntity } from "../../../domain/entities/user/user.entity";
 import {
   TLoginCommand,
   TRegisterCommand,
 } from "../../commands/auth/auth.command";
-import { randomUUID } from "crypto";
-import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { JwtService, TRefreshTokenPayload } from "../../../core/utils/jwt";
-import { HashService } from "../../../core/utils/hash";
 import { TokenEntity } from "../../../domain/entities/token/token.entity";
-import { injectable, inject } from "inversify";
-import { CSRFService } from "../../services/csrf.service";
 import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
+import { IJwtService } from "../../ports/jwt.port";
+import { ICsrfService } from "../../ports/csrf.port";
+import { IHashService } from "../../ports/hash-service.port";
 
-@injectable()
 export class AuthUseCases {
   constructor(
-    @inject(CONTAINER_TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-
-    @inject(CONTAINER_TYPES.TokenRepository)
     private readonly tokenRepository: ITokenRepository,
-
-    @inject(CONTAINER_TYPES.AuditLogRepository)
     private readonly auditLogRepository: IAuditLogRepository,
+
+    private readonly jwtService: IJwtService,
+    private readonly csrfService: ICsrfService,
+    private readonly hashService: IHashService,
   ) {}
 
   registerUseCase = async (data: TRegisterCommand) => {
@@ -35,10 +29,13 @@ export class AuthUseCases {
       throw new AppError("Email already exists", 409);
     }
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await this.hashService.hashPassword(
+      data.password,
+      10,
+    );
 
     const userData = new UserEntity({
-      id: randomUUID(),
+      id: this.hashService.randomUUID(),
       email: data.email,
       password: hashedPassword,
       firstName: data.firstName,
@@ -52,18 +49,18 @@ export class AuthUseCases {
 
     const user = await this.userRepository.save(userData);
 
-    const familyId = HashService.randomTokenId();
+    const familyId = this.hashService.randomTokenId();
 
-    const accessToken = JwtService.signAccessToken(user);
+    const accessToken = this.jwtService.signAccessToken(user);
 
-    const refreshToken = JwtService.signRefreshToken(user, familyId);
+    const refreshToken = this.jwtService.signRefreshToken(user, familyId);
 
-    const hashToken = HashService.hashToken(refreshToken);
+    const hashToken = this.hashService.hashToken(refreshToken);
 
-    const csrfToken = CSRFService.generateToken(familyId);
+    const csrfToken = this.csrfService.generateToken(familyId);
 
     const refreshTokenEntity = new TokenEntity({
-      id: randomUUID(),
+      id: this.hashService.randomUUID(),
       userId: user.id,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       createdAt: new Date(),
@@ -105,7 +102,10 @@ export class AuthUseCases {
       throw new AppError("Invalid Credentials", 401);
     }
 
-    const isPasswordValid = await bcrypt.compare(data.password, user.password);
+    const isPasswordValid = await this.hashService.comparePassword(
+      data.password,
+      user.password,
+    );
     if (!isPasswordValid) {
       await this.auditLogRepository.create({
         actorId: null,
@@ -122,17 +122,17 @@ export class AuthUseCases {
       throw new AppError("Invalid Credentials", 401);
     }
 
-    const familyId = HashService.randomTokenId();
+    const familyId = this.hashService.randomTokenId();
 
-    const accessToken = JwtService.signAccessToken(user);
-    const refreshToken = JwtService.signRefreshToken(user, familyId);
+    const accessToken = this.jwtService.signAccessToken(user);
+    const refreshToken = this.jwtService.signRefreshToken(user, familyId);
 
-    const tokenHash = HashService.hashToken(refreshToken);
+    const tokenHash = this.hashService.hashToken(refreshToken);
 
-    const csrfToken = CSRFService.generateToken(familyId);
+    const csrfToken = this.csrfService.generateToken(familyId);
 
     await this.tokenRepository.save({
-      id: randomUUID(),
+      id: this.hashService.randomUUID(),
       userId: user.id,
       familyId,
       tokenHash,
@@ -174,17 +174,15 @@ export class AuthUseCases {
     userAgent: string | null;
     ipAddress: string | null;
   }) => {
-    let payload: TRefreshTokenPayload;
+    let payload;
 
     try {
-      payload = JwtService.verifyRefreshToken(
-        refreshToken,
-      ) as TRefreshTokenPayload;
+      payload = this.jwtService.verifyRefreshToken(refreshToken);
     } catch (error) {
       throw new AppError("Invalid refresh token", 401);
     }
 
-    const hashToken = HashService.hashToken(refreshToken);
+    const hashToken = this.hashService.hashToken(refreshToken);
     const token = await this.tokenRepository.findByTokenHash(hashToken);
 
     if (!token) {
@@ -223,13 +221,16 @@ export class AuthUseCases {
       throw new AppError("Session no longer valid", 401);
     }
 
-    const newAccessToken = JwtService.signAccessToken(user);
-    const newRefreshToken = JwtService.signRefreshToken(user, token.familyId);
-    const newHashToken = HashService.hashToken(newRefreshToken);
-    const newCsrfToken = CSRFService.generateToken(token.familyId);
+    const newAccessToken = this.jwtService.signAccessToken(user);
+    const newRefreshToken = this.jwtService.signRefreshToken(
+      user,
+      token.familyId,
+    );
+    const newHashToken = this.hashService.hashToken(newRefreshToken);
+    const newCsrfToken = this.csrfService.generateToken(token.familyId);
 
     await this.tokenRepository.save({
-      id: randomUUID(),
+      id: this.hashService.randomUUID(),
       userId: user.id,
       familyId: token.familyId,
       tokenHash: newHashToken,
@@ -263,7 +264,7 @@ export class AuthUseCases {
     refreshToken: string;
     ipAddress: string | null;
   }) => {
-    const hashToken = HashService.hashToken(refreshToken);
+    const hashToken = this.hashService.hashToken(refreshToken);
 
     const token = await this.tokenRepository.findByTokenHash(hashToken);
 

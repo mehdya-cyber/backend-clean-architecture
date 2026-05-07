@@ -9,22 +9,23 @@ import { TokenRepository } from "../../infrastructure/db/prisma/repository/token
 import { AuthUseCases } from "../../application/use-cases/auth/auth.use-cases";
 import { ItemUseCases } from "../../application/use-cases/item/item.use-cases";
 import { UserUseCases } from "../../application/use-cases/user/user.use-cases";
-import { AuthController } from "../../interface/http/controllers/auth.controller";
-import { ItemController } from "../../interface/http/controllers/item.controller";
-import { UserController } from "../../interface/http/controllers/user.controller";
-import { AuthMiddleware } from "../../interface/http/middleware/auth.middleware";
+import { AuthController } from "../../presentation/http/controllers/auth.controller";
+import { ItemController } from "../../presentation/http/controllers/item.controller";
+import { UserController } from "../../presentation/http/controllers/user.controller";
+import { AuthMiddleware } from "../../presentation/http/middleware/auth.middleware";
 import { IAuditLogRepository } from "../../domain/interfaces/audit-log-repository.interface";
 import { AuditLogRepository } from "../../infrastructure/db/prisma/repository/audit-log/audit-log.repository";
-import { ITransactionManager } from "../../core/interfaces/transaction-manager.interfaces";
+import { ITransactionManager } from "../../application/ports/transaction-manager.port";
 import { PrismaTransactionManager } from "../../infrastructure/db/prisma/prisma-transaction-manager";
 import { IBulkUploadRepository } from "../../domain/interfaces/bulk-upload-repository.interface";
 import { BulkUploadRepository } from "../../infrastructure/db/prisma/repository/bulk-upload/bulk-upload.repository";
-import { IQueueService } from "../../domain/interfaces/queue-service.interface";
+import { IQueueService } from "../../application/ports/queue-service.port";
 import { ItemsBulkUploadQueue } from "../../infrastructure/queues/instances";
-import {
-  FileParserService,
-  IFileParser,
-} from "../../application/services/file-parser.service";
+import { CsvFileParser } from "../../infrastructure/services/csv-parser.service";
+import { ICsvFileParser } from "../../application/ports/file-parser.port";
+import { IHashService } from "../../application/ports/hash-service.port";
+import { ICsrfService } from "../../application/ports/csrf.port";
+import { IJwtService } from "../../application/ports/jwt.port";
 
 export const container = new Container();
 
@@ -55,9 +56,45 @@ container
   .inSingletonScope();
 
 // USE CASES BINDINGS
-container.bind<AuthUseCases>(CONTAINER_TYPES.AuthUseCases).to(AuthUseCases);
-container.bind<ItemUseCases>(CONTAINER_TYPES.ItemUseCases).to(ItemUseCases);
-container.bind<UserUseCases>(CONTAINER_TYPES.UserUseCases).to(UserUseCases);
+container
+  .bind<AuthUseCases>(CONTAINER_TYPES.AuthUseCases)
+  .toDynamicValue(
+    (ctx) =>
+      new AuthUseCases(
+        ctx.get<IUserRepository>(CONTAINER_TYPES.UserRepository),
+        ctx.get<ITokenRepository>(CONTAINER_TYPES.TokenRepository),
+        ctx.get<IAuditLogRepository>(CONTAINER_TYPES.AuditLogRepository),
+        ctx.get<IJwtService>(CONTAINER_TYPES.JwtService),
+        ctx.get<ICsrfService>(CONTAINER_TYPES.CsrfService),
+        ctx.get<IHashService>(CONTAINER_TYPES.HashService),
+      ),
+  );
+
+container
+  .bind<ItemUseCases>(CONTAINER_TYPES.ItemUseCases)
+  .toDynamicValue(
+    (ctx) =>
+      new ItemUseCases(
+        ctx.get<IItemRepository>(CONTAINER_TYPES.ItemRepository),
+        ctx.get<IUserRepository>(CONTAINER_TYPES.UserRepository),
+        ctx.get<IAuditLogRepository>(CONTAINER_TYPES.AuditLogRepository),
+        ctx.get<IBulkUploadRepository>(CONTAINER_TYPES.BulkUploadRepository),
+        ctx.get<ITransactionManager>(CONTAINER_TYPES.TransactionManager),
+        ctx.get<IQueueService>(CONTAINER_TYPES.QueueService),
+        ctx.get<IHashService>(CONTAINER_TYPES.HashService),
+      ),
+  );
+
+container
+  .bind<UserUseCases>(CONTAINER_TYPES.UserUseCases)
+  .toDynamicValue(
+    (ctx) =>
+      new UserUseCases(
+        ctx.get<IUserRepository>(CONTAINER_TYPES.UserRepository),
+        ctx.get<IAuditLogRepository>(CONTAINER_TYPES.AuditLogRepository),
+        ctx.get<IHashService>(CONTAINER_TYPES.HashService),
+      ),
+  );
 
 // CONTROLLER BINDINGS
 container.bind(CONTAINER_TYPES.AuthController).to(AuthController);
@@ -81,6 +118,6 @@ container
   .toConstantValue(ItemsBulkUploadQueue);
 
 container
-  .bind<IFileParser>(CONTAINER_TYPES.FileParser)
-  .to(FileParserService)
+  .bind<ICsvFileParser>(CONTAINER_TYPES.FileParser)
+  .to(CsvFileParser)
   .inSingletonScope();

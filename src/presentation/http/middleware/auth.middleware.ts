@@ -1,24 +1,26 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../../core/error/app-error";
-import { JwtService, TRefreshTokenPayload } from "../../../core/utils/jwt";
 import { IUserRepository } from "../../../domain/interfaces/user-repository.interface";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { CSRFService } from "../../../application/services/csrf.service";
-
-type TAccessTokenPayload = {
-  userId: string;
-  role: string;
-  sub: string;
-  tokenVersion: number;
-  exp: number;
-};
+import {
+  IJwtService,
+  TAccessTokenPayload,
+  TRefreshTokenPayload,
+} from "../../../application/ports/jwt.port";
+import { ICsrfService } from "../../../application/ports/csrf.port";
 
 @injectable()
 export class AuthMiddleware {
   constructor(
     @inject(CONTAINER_TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
+
+    @inject(CONTAINER_TYPES.JwtService)
+    private readonly jwtService: IJwtService,
+
+    @inject(CONTAINER_TYPES.CsrfService)
+    private readonly csrfService: ICsrfService,
   ) {}
 
   requireAuth = async (req: Request, _res: Response, next: NextFunction) => {
@@ -34,7 +36,7 @@ export class AuthMiddleware {
         return next(new AppError("Missing or invalid token", 401));
       }
 
-      const payload = JwtService.verifyAccessToken(
+      const payload = this.jwtService.verifyAccessToken(
         token,
       ) as TAccessTokenPayload;
 
@@ -72,11 +74,11 @@ export class AuthMiddleware {
       return next(new AppError("Invalid CSRF token", 401));
     }
 
-    const payload: TRefreshTokenPayload = JwtService.verifyRefreshToken(
+    const payload: TRefreshTokenPayload = this.jwtService.verifyRefreshToken(
       refreshToken,
     ) as TRefreshTokenPayload;
 
-    const isValid = CSRFService.verifyToken(
+    const isValid = this.csrfService.verifyToken(
       csrfHeader as string,
       payload.familyId,
     );

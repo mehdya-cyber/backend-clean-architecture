@@ -1,6 +1,7 @@
-import { prisma } from "../../../../../core/config/prisma";
 import { IAuditLog } from "../../../../../domain/entities/audit-log/audit-log.entity";
 import { IAuditLogRepository } from "../../../../../domain/interfaces/audit-log-repository.interface";
+import { Prisma } from "../../generated/prisma/client";
+import { prisma } from "../../prisma";
 
 export class AuditLogRepository implements IAuditLogRepository {
   constructor() {}
@@ -17,7 +18,7 @@ export class AuditLogRepository implements IAuditLogRepository {
         action: data.action,
         entity: data.entity,
         entityId: data.entityId,
-        metadata: data.metadata,
+        metadata: data.metadata as Prisma.InputJsonValue,
       },
     });
   };

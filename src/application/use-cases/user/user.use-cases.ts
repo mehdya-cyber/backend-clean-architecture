@@ -1,20 +1,16 @@
 import { IUserRepository } from "../../../domain/interfaces/user-repository.interface";
 import { AppError } from "../../../core/error/app-error";
-import bcrypt from "bcrypt";
 import { TCreateUserCommand } from "../../commands/user/user.command";
 import { UserEntity } from "../../../domain/entities/user/user.entity";
-import { randomUUID } from "crypto";
-import { injectable, inject } from "inversify";
-import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
+import { IHashService } from "../../ports/hash-service.port";
 
-@injectable()
 export class UserUseCases {
   constructor(
-    @inject(CONTAINER_TYPES.UserRepository)
     private readonly userRepository: IUserRepository,
-    @inject(CONTAINER_TYPES.AuditLogRepository)
     private readonly auditLogRepository: IAuditLogRepository,
+
+    private readonly hashService: IHashService,
   ) {}
 
   getUserUseCase = async ({ id }: { id: string }) => {
@@ -34,10 +30,13 @@ export class UserUseCases {
 
     if (user) throw new AppError("User already exists", 409);
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const hashedPassword = await this.hashService.hashPassword(
+      data.password,
+      10,
+    );
 
     const userData = new UserEntity({
-      id: randomUUID(),
+      id: this.hashService.randomUUID(),
       email: data.email,
       password: hashedPassword,
       firstName: data.firstName,

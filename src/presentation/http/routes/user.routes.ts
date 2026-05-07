@@ -4,7 +4,7 @@ import { validationMiddleware } from "../middleware/validation.middleware";
 import { container } from "../../../core/container/container";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { AuthMiddleware } from "../middleware/auth.middleware";
-import { paramsIdDto } from "../../../core/validation/params.validation";
+import { paramsIdDto } from "../../validation/params.validation";
 
 export const createUserRouter = () => {
   const userRouter = Router();

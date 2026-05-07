@@ -1,5 +1,5 @@
 import z from "zod";
-import { paginationParamsDto } from "../../../../core/validation/pagination.validation";
+import { paginationParamsDto } from "../../../validation/pagination.validation";
 
 export const itemParamsDto = z
   .object({

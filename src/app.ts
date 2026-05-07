@@ -3,12 +3,12 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import cookieParser from "cookie-parser";
-import { router } from "./interface/http/routes";
+import { router } from "./presentation/http/routes";
 import { env } from "./core/config/env";
-import { notFoundMiddleware } from "./interface/http/middleware/not-found.middleware";
-import { errorMiddleware } from "./interface/http/middleware/error.middleware";
-import { httpLoggerMiddleware } from "./interface/http/middleware/http-logger.middleware";
-import { requestIdMiddleware } from "./interface/http/middleware/request-id.middleware";
+import { notFoundMiddleware } from "./presentation/http/middleware/not-found.middleware";
+import { errorMiddleware } from "./presentation/http/middleware/error.middleware";
+import { httpLoggerMiddleware } from "./presentation/http/middleware/http-logger.middleware";
+import { requestIdMiddleware } from "./presentation/http/middleware/request-id.middleware";
 
 export const app = express();
 

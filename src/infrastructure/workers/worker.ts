@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
-import { logger } from "../../core/config/logger";
 import { redisConnection } from "../redis/redis-connection";
+import { logger } from "../logging/logger";
 
 export class GenericWorker<T> {
   private worker: Worker;

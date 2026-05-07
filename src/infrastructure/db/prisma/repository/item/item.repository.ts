@@ -4,8 +4,6 @@ import {
   IItemRepository,
 } from "../../../../../domain/interfaces/item-repository.interface";
 import { Item, Prisma } from "../../generated/prisma/client";
-import { prisma } from "../../../../../core/config/prisma";
-import { injectable } from "inversify";
 import { TPaginated } from "../../../../../core/types/paginated.types";
 import {
   getPaginatedMeta,
@@ -13,8 +11,8 @@ import {
 } from "../../../../../core/utils/paginated";
 import { TransactionContext } from "../../../../../core/types/transaction-context.types";
 import { BasePrismaRepository } from "../../base-prisma-repository";
+import { prisma } from "../../prisma";
 
-@injectable()
 export class ItemRepository
   extends BasePrismaRepository
   implements IItemRepository

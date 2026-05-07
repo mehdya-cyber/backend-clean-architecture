@@ -1,4 +1,4 @@
-import { tryCatchAsync } from "../../../core/utils/try-catch-async";
+import { tryCatchAsync } from "../helpers/try-catch-async";
 import { Request, Response } from "express";
 import { AuthUseCases } from "../../../application/use-cases/auth/auth.use-cases";
 import { AuthMapper } from "../../mappers/auth.mapper";
@@ -12,8 +12,8 @@ import {
 } from "../../../application/commands/auth/auth.command";
 import { injectable, inject } from "inversify";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { getRequestMeta } from "../../../core/utils/get-request-meta";
-import { CookieService } from "../../../core/utils/cookies";
+import { getRequestMeta } from "../helpers/get-request-meta";
+import { CookieService } from "../../services/cookie.service";
 import { AppError } from "../../../core/error/app-error";
 
 @injectable()

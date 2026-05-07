@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -17,8 +16,8 @@ type TEnv = {
   DATABASE_URL: string;
   JWT_ACCESS_SECRET: string;
   JWT_REFRESH_SECRET: string;
-  JWT_ACCESS_EXPIRES_IN: jwt.SignOptions["expiresIn"];
-  JWT_REFRESH_EXPIRES_IN: jwt.SignOptions["expiresIn"];
+  JWT_ACCESS_EXPIRES_IN: string;
+  JWT_REFRESH_EXPIRES_IN: string;
   CORS_ORIGIN: string;
   COOKIE_DOMAIN: string;
   CSRF_SECRET: string;
@@ -36,12 +35,8 @@ export const env: TEnv = {
   DATABASE_URL: requireEnv("DATABASE_URL"),
   JWT_ACCESS_SECRET: requireEnv("JWT_ACCESS_SECRET"),
   JWT_REFRESH_SECRET: requireEnv("JWT_REFRESH_SECRET"),
-  JWT_ACCESS_EXPIRES_IN: requireEnv(
-    "JWT_ACCESS_EXPIRES_IN",
-  ) as jwt.SignOptions["expiresIn"],
-  JWT_REFRESH_EXPIRES_IN: requireEnv(
-    "JWT_REFRESH_EXPIRES_IN",
-  ) as jwt.SignOptions["expiresIn"],
+  JWT_ACCESS_EXPIRES_IN: requireEnv("JWT_ACCESS_EXPIRES_IN"),
+  JWT_REFRESH_EXPIRES_IN: requireEnv("JWT_REFRESH_EXPIRES_IN"),
   CORS_ORIGIN: requireEnv("CORS_ORIGIN"),
   COOKIE_DOMAIN: requireEnv("COOKIE_DOMAIN"),
   CSRF_SECRET: requireEnv("CSRF_SECRET"),

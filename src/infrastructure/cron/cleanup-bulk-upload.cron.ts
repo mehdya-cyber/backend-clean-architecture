@@ -1,6 +1,6 @@
 import cron from "node-cron";
-import { logger } from "../../core/config/logger";
-import { prisma } from "../../core/config/prisma";
+import { logger } from "../logging/logger";
+import { prisma } from "../db/prisma/prisma";
 
 export const cleanupBulkUploadCronJob = () => {
   cron.schedule("0 2 * * *", async () => {

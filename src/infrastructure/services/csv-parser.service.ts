@@ -1,10 +1,7 @@
 import { parse } from "csv-parse/sync";
+import { ICsvFileParser } from "../../application/ports/file-parser.port";
 
-export interface IFileParser {
-  parseCsv<T>(buffer: Buffer): T[];
-}
-
-export class FileParserService implements IFileParser {
+export class CsvFileParser implements ICsvFileParser {
   parseCsv<T>(buffer: Buffer): T[] {
     return parse(buffer, {
       columns: true,

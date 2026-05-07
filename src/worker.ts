@@ -1,6 +1,6 @@
 import "reflect-metadata";
-import { logger } from "./core/config/logger";
 import { startItemsBulkUploadWorker } from "./infrastructure/workers/bulk-upload.worker";
+import { logger } from "./infrastructure/logging/logger";
 
 startItemsBulkUploadWorker();
 

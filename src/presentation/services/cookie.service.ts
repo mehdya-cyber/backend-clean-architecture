@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { env } from "../config/env";
+import { env } from "../../core/config/env";
 
 export class CookieService {
   private static isProduction = env.NODE_ENV === "production";

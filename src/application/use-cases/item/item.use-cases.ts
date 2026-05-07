@@ -9,35 +9,24 @@ import {
   TProcessBulkUploadItemsCommand,
 } from "../../commands/item/item.command";
 import { ItemEntity } from "../../../domain/entities/item/item.entity";
-import { randomUUID } from "crypto";
-import { injectable, inject } from "inversify";
-import { CONTAINER_TYPES } from "../../../core/container/container.types";
 import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
-import { ITransactionManager } from "../../../core/interfaces/transaction-manager.interfaces";
+import { ITransactionManager } from "../../ports/transaction-manager.port";
 import { BulkUploadEntity } from "../../../domain/entities/bulk-upload/bulk-upload.entity";
 import { IBulkUploadRepository } from "../../../domain/interfaces/bulk-upload-repository.interface";
-import { IQueueService } from "../../../domain/interfaces/queue-service.interface";
+import { IQueueService } from "../../ports/queue-service.port";
 import { chunkArray } from "../../../core/utils/chunk-array";
+import { IHashService } from "../../ports/hash-service.port";
 
-@injectable()
 export class ItemUseCases {
   constructor(
-    @inject(CONTAINER_TYPES.ItemRepository)
-    private itemRepository: IItemRepository,
-    @inject(CONTAINER_TYPES.UserRepository)
-    private userRepository: IUserRepository,
+    private readonly itemRepository: IItemRepository,
+    private readonly userRepository: IUserRepository,
+    private readonly auditLogRepository: IAuditLogRepository,
+    private readonly bulkUploadRepository: IBulkUploadRepository,
 
-    @inject(CONTAINER_TYPES.AuditLogRepository)
-    private auditLogRepository: IAuditLogRepository,
-
-    @inject(CONTAINER_TYPES.TransactionManager)
-    private transactionManager: ITransactionManager,
-
-    @inject(CONTAINER_TYPES.BulkUploadRepository)
-    private bulkUploadRepository: IBulkUploadRepository,
-
-    @inject(CONTAINER_TYPES.QueueService)
-    private queueService: IQueueService,
+    private readonly transactionManager: ITransactionManager,
+    private readonly queueService: IQueueService,
+    private readonly hashService: IHashService,
   ) {}
 
   getItemsUseCase = async (query: TItemsQueryCommand) => {
@@ -53,7 +42,7 @@ export class ItemUseCases {
       }
 
       const itemData = new ItemEntity({
-        id: randomUUID(),
+        id: this.hashService.randomUUID(),
         name: data.name,
         description: data.description || null,
         tags: data.tags || [],
@@ -131,7 +120,7 @@ export class ItemUseCases {
         }
 
         const bulkUpload = new BulkUploadEntity({
-          id: randomUUID(),
+          id: this.hashService.randomUUID(),
           fileName: data.fileName,
           userId: user.id,
           createdAt: new Date(),
@@ -216,7 +205,7 @@ export class ItemUseCases {
           const now = new Date();
 
           const itemEntity = new ItemEntity({
-            id: randomUUID(),
+            id: this.hashService.randomUUID(),
             name: item.name,
             price: item.price,
             userId: bulkUpload.userId,

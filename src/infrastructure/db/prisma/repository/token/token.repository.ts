@@ -1,13 +1,11 @@
-import { injectable } from "inversify";
-import { prisma } from "../../../../../core/config/prisma";
 import {
   ITokenEntity,
   TokenEntity,
 } from "../../../../../domain/entities/token/token.entity";
 import { ITokenRepository } from "../../../../../domain/interfaces/token-repository.interface";
 import { RefreshToken } from "../../generated/prisma/client";
+import { prisma } from "../../prisma";
 
-@injectable()
 export class TokenRepository implements ITokenRepository {
   private tokenMapper = (refreshToken: RefreshToken) => {
     return {

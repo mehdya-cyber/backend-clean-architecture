@@ -1,4 +1,4 @@
-import { IQueueService } from "../../../domain/interfaces/queue-service.interface";
+import { IQueueService } from "../../../application/ports/queue-service.port";
 import { Queue } from "bullmq";
 import { redisConnection } from "../../redis/redis-connection";
 import { injectable } from "inversify";

@@ -10,7 +10,7 @@ import {
 import { AuthMiddleware } from "../middleware/auth.middleware";
 import { container } from "../../../core/container/container";
 import { CONTAINER_TYPES } from "../../../core/container/container.types";
-import { paramsIdDto } from "../../../core/validation/params.validation";
+import { paramsIdDto } from "../../validation/params.validation";
 import { itemParamsDto } from "../dtos/item/item-params.dto";
 import { uploadMiddleware } from "../middleware/upload.middleware";
 

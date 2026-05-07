@@ -1,13 +1,11 @@
-import { prisma } from "../../../../../core/config/prisma";
 import {
   IUserEntity,
   UserEntity,
 } from "../../../../../domain/entities/user/user.entity";
 import { IUserRepository } from "../../../../../domain/interfaces/user-repository.interface";
 import { User } from "../../generated/prisma/client";
-import { injectable } from "inversify";
+import { prisma } from "../../prisma";
 
-@injectable()
 export class UserRepository implements IUserRepository {
   private toEntity(user: User): UserEntity {
     return new UserEntity({

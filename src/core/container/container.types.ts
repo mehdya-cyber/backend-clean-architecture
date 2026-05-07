@@ -23,4 +23,8 @@ export const CONTAINER_TYPES = {
   // SERVICES
   QueueService: Symbol.for("QueueService"),
   FileParser: Symbol.for("FileParser"),
+  JwtService: Symbol.for("JwtService"),
+  CsrfService: Symbol.for("CsrfService"),
+  CookieService: Symbol.for("CookieService"),
+  HashService: Symbol.for("HashService"),
 };

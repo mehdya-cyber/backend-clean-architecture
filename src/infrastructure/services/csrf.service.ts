@@ -1,10 +1,11 @@
 import { env } from "../../core/config/env";
 import crypto from "crypto";
+import { ICsrfService } from "../../application/ports/csrf.port";
 
-export class CSRFService {
-  private static secret = env.CSRF_SECRET;
+export class CSRFService implements ICsrfService {
+  private secret = env.CSRF_SECRET;
 
-  static generateToken(familyId: string) {
+  generateToken(familyId: string) {
     const numOne = crypto.randomBytes(32).toString("base64url");
 
     const signature = crypto
@@ -15,7 +16,7 @@ export class CSRFService {
     return `${numOne}.${signature}`;
   }
 
-  static verifyToken(token: string, familyId: string) {
+  verifyToken(token: string, familyId: string) {
     const [numOne, signature] = token.split(".");
 
     if (!numOne || !signature) return false;

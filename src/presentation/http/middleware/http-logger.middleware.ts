@@ -1,6 +1,6 @@
 import pinoHttp from "pino-http";
-import { logger } from "../../../core/config/logger";
 import { randomUUID } from "node:crypto";
+import { logger } from "../../../infrastructure/logging/logger";
 
 export const httpLoggerMiddleware = pinoHttp({
   logger,
