@@ -140,6 +140,15 @@ services:
       migrate:
         condition: service_completed_successfully
 
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit-dev
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - prisma-network
+
 volumes:
   postgres_data:
   node_modules:

@@ -7,6 +7,7 @@ import {
   TItemsQueryCommand,
   TItemBulkUploadCommand,
   TProcessBulkUploadItemsCommand,
+  TItemBulkUploadJobData,
 } from "../../commands/item/item.command";
 import { ItemEntity } from "../../../domain/entities/item/item.entity";
 import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-repository.interface";
@@ -25,7 +26,7 @@ export class ItemUseCases {
     private readonly bulkUploadRepository: IBulkUploadRepository,
 
     private readonly transactionManager: ITransactionManager,
-    private readonly queueService: IQueueService,
+    private readonly bulkUploadQueue: IQueueService<TItemBulkUploadJobData>,
     private readonly hashService: IHashService,
   ) {}
 
@@ -155,17 +156,17 @@ export class ItemUseCases {
       },
     );
 
-    const chunks = chunkArray(data.items, 1000);
+    const chunks = chunkArray(data.items, 1000) ?? [];
     for (let i = 0; i < chunks.length; i++) {
-      await this.queueService.add("items-bulk-upload", {
-        jobId: `${bulkupload.id}-chunk-${i}`,
-        batchId: bulkupload.id,
-        data: {
+      await this.bulkUploadQueue.add(
+        "items-bulk-upload-job",
+        {
           bulkUploadId: bulkupload.id,
           userId: data.userId,
-          items: chunks[i],
+          items: chunks[i] ?? [],
         },
-      });
+        { jobId: `${bulkupload.id}-${i}` },
+      );
     }
 
     return {

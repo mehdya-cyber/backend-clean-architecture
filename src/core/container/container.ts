@@ -20,12 +20,22 @@ import { PrismaTransactionManager } from "../../infrastructure/db/prisma/prisma-
 import { IBulkUploadRepository } from "../../domain/interfaces/bulk-upload-repository.interface";
 import { BulkUploadRepository } from "../../infrastructure/db/prisma/repository/bulk-upload/bulk-upload.repository";
 import { IQueueService } from "../../application/ports/queue-service.port";
-import { ItemsBulkUploadQueue } from "../../infrastructure/queues/instances";
+import {
+  emailQueue,
+  itemsBulkUploadQueue,
+} from "../../infrastructure/queues/instances";
 import { CsvFileParser } from "../../infrastructure/services/csv-parser.service";
 import { ICsvFileParser } from "../../application/ports/file-parser.port";
 import { IHashService } from "../../application/ports/hash-service.port";
 import { ICsrfService } from "../../application/ports/csrf.port";
 import { IJwtService } from "../../application/ports/jwt.port";
+import { IEmailService } from "../../application/ports/email-service.port";
+import { NodemailerEmailService } from "../../infrastructure/services/email/nodemailer-email.service";
+import { TItemBulkUploadJobData } from "../../application/commands/item/item.command";
+import { TEmailJobData } from "../../application/commands/auth/auth.command";
+import { JwtService } from "../../infrastructure/services/jwt.service";
+import { CSRFService } from "../../infrastructure/services/csrf.service";
+import { HashService } from "../../infrastructure/services/hash.service";
 
 export const container = new Container();
 
@@ -67,8 +77,11 @@ container
         ctx.get<IJwtService>(CONTAINER_TYPES.JwtService),
         ctx.get<ICsrfService>(CONTAINER_TYPES.CsrfService),
         ctx.get<IHashService>(CONTAINER_TYPES.HashService),
+        ctx.get<ITransactionManager>(CONTAINER_TYPES.TransactionManager),
+        ctx.get<IQueueService<TEmailJobData>>(CONTAINER_TYPES.EmailQueue),
       ),
-  );
+  )
+  .inSingletonScope();
 
 container
   .bind<ItemUseCases>(CONTAINER_TYPES.ItemUseCases)
@@ -80,10 +93,13 @@ container
         ctx.get<IAuditLogRepository>(CONTAINER_TYPES.AuditLogRepository),
         ctx.get<IBulkUploadRepository>(CONTAINER_TYPES.BulkUploadRepository),
         ctx.get<ITransactionManager>(CONTAINER_TYPES.TransactionManager),
-        ctx.get<IQueueService>(CONTAINER_TYPES.QueueService),
+        ctx.get<IQueueService<TItemBulkUploadJobData>>(
+          CONTAINER_TYPES.ItemsBulkUploadQueue,
+        ),
         ctx.get<IHashService>(CONTAINER_TYPES.HashService),
       ),
-  );
+  )
+  .inSingletonScope();
 
 container
   .bind<UserUseCases>(CONTAINER_TYPES.UserUseCases)
@@ -94,7 +110,8 @@ container
         ctx.get<IAuditLogRepository>(CONTAINER_TYPES.AuditLogRepository),
         ctx.get<IHashService>(CONTAINER_TYPES.HashService),
       ),
-  );
+  )
+  .inSingletonScope();
 
 // CONTROLLER BINDINGS
 container.bind(CONTAINER_TYPES.AuthController).to(AuthController);
@@ -114,10 +131,36 @@ container
   .inSingletonScope();
 
 container
-  .bind<IQueueService>(CONTAINER_TYPES.QueueService)
-  .toConstantValue(ItemsBulkUploadQueue);
+  .bind<
+    IQueueService<TItemBulkUploadJobData>
+  >(CONTAINER_TYPES.ItemsBulkUploadQueue)
+  .toConstantValue(itemsBulkUploadQueue);
+
+container
+  .bind<IQueueService<TEmailJobData>>(CONTAINER_TYPES.EmailQueue)
+  .toConstantValue(emailQueue);
 
 container
   .bind<ICsvFileParser>(CONTAINER_TYPES.FileParser)
   .to(CsvFileParser)
+  .inSingletonScope();
+
+container
+  .bind<IEmailService>(CONTAINER_TYPES.EmailService)
+  .to(NodemailerEmailService)
+  .inSingletonScope();
+
+container
+  .bind<IJwtService>(CONTAINER_TYPES.JwtService)
+  .to(JwtService)
+  .inSingletonScope();
+
+container
+  .bind<ICsrfService>(CONTAINER_TYPES.CsrfService)
+  .to(CSRFService)
+  .inSingletonScope();
+
+container
+  .bind<IHashService>(CONTAINER_TYPES.HashService)
+  .to(HashService)
   .inSingletonScope();

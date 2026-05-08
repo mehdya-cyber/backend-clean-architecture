@@ -27,6 +27,11 @@ type TEnv = {
   REDIS_HOST: string;
   REDIS_PORT: number;
   REDIS_PASSWORD: string;
+  SMTP_HOST: string;
+  SMTP_PORT: number;
+  SMTP_USER: string;
+  SMTP_PASSWORD: string;
+  EMAIL_FROM: string;
 };
 
 export const env: TEnv = {
@@ -46,4 +51,9 @@ export const env: TEnv = {
   REDIS_HOST: requireEnv("REDIS_HOST"),
   REDIS_PORT: Number(requireEnv("REDIS_PORT")),
   REDIS_PASSWORD: requireEnv("REDIS_PASSWORD"),
+  SMTP_HOST: requireEnv("SMTP_HOST"),
+  SMTP_PORT: Number(requireEnv("SMTP_PORT")),
+  SMTP_USER: process.env.SMTP_USER ?? "",
+  SMTP_PASSWORD: process.env.SMTP_PASSWORD ?? "",
+  EMAIL_FROM: requireEnv("EMAIL_FROM"),
 };

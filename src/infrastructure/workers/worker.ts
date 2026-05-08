@@ -1,4 +1,4 @@
-import { Worker } from "bullmq";
+import { Job, Worker } from "bullmq";
 import { redisConnection } from "../redis/redis-connection";
 import { logger } from "../logging/logger";
 
@@ -7,9 +7,12 @@ export class GenericWorker<T> {
 
   constructor(
     queueName: string,
-    processor: (job: { data: T }) => Promise<void>,
+    processor: (job: Job<T>) => Promise<void>,
+    options?: {
+      concurrency?: number;
+    },
   ) {
-    this.worker = new Worker(
+    this.worker = new Worker<T>(
       queueName,
       async (job) => {
         logger.info({ jobId: job.id }, "Processing job");
@@ -17,16 +20,15 @@ export class GenericWorker<T> {
       },
       {
         connection: redisConnection,
-        concurrency: 3,
+        concurrency: options?.concurrency,
       },
     );
     this.worker.on("completed", (job) => {
       logger.info(
         {
           jobId: job.id,
-          bulkUploadId: job.data.bulkUploadId,
         },
-        "Item bulk upload job completed",
+        `Worker job completed for ${queueName}`,
       );
     });
 
@@ -34,10 +36,9 @@ export class GenericWorker<T> {
       logger.error(
         {
           jobId: job?.id,
-          bulkUploadId: job?.data?.bulkUploadId,
           err,
         },
-        "Item bulk upload job failed",
+        `Worker job failed for ${queueName}`,
       );
     });
   }

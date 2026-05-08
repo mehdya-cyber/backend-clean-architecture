@@ -1,6 +1,10 @@
-export interface IQueueService {
-  add<T>(
-    name: string,
-    data: { jobId: string; batchId: string; data: T },
-  ): Promise<void>;
+export type TQueueJobOptions = {
+  jobId?: string;
+  delay?: number;
+  attempts?: number;
+  priority?: number;
+};
+
+export interface IQueueService<T, TJobName extends string = string> {
+  add(name: TJobName, jobData: T, options?: TQueueJobOptions): Promise<void>;
 }

@@ -43,3 +43,13 @@ export type TProcessBulkUploadItemsCommand = {
     tags: string[];
   }[];
 };
+
+export type TItemBulkUploadJobData = {
+  bulkUploadId: string;
+  userId: string;
+  items: {
+    name: string;
+    price: number;
+    tags: string[];
+  }[];
+};

@@ -1,10 +1,17 @@
-import { IQueueService } from "../../../application/ports/queue-service.port";
-import { Queue } from "bullmq";
+import {
+  IQueueService,
+  TQueueJobOptions,
+} from "../../../application/ports/queue-service.port";
+import { JobsOptions, Queue } from "bullmq";
 import { redisConnection } from "../../redis/redis-connection";
 import { injectable } from "inversify";
+import { randomUUID } from "node:crypto";
 
 @injectable()
-export class BullMQQueueService implements IQueueService {
+export class BullMQQueueService<
+  T,
+  TJobName extends string = string,
+> implements IQueueService<T, TJobName> {
   private queue: Queue;
 
   constructor(queueName: string) {
@@ -26,16 +33,13 @@ export class BullMQQueueService implements IQueueService {
     });
   }
 
-  async add<T>(name: string, data: { jobId: string; data: T }): Promise<void> {
-    await this.queue.add(
-      name,
-      {
-        ...data.data,
-      },
-      {
-        jobId: data.jobId,
-        priority: 1,
-      },
-    );
+  async add(name: string, data: T, options?: TQueueJobOptions): Promise<void> {
+    const bullOptions: JobsOptions = {
+      jobId: options?.jobId ?? randomUUID(),
+      priority: options?.priority ?? 1,
+      delay: options?.delay,
+    };
+
+    await this.queue.add(name, data, bullOptions);
   }
 }

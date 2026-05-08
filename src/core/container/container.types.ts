@@ -21,10 +21,12 @@ export const CONTAINER_TYPES = {
   AuthMiddleware: Symbol.for("AuthMiddleware"),
 
   // SERVICES
-  QueueService: Symbol.for("QueueService"),
+  ItemsBulkUploadQueue: Symbol.for("ItemsBulkUploadQueue"),
+  EmailQueue: Symbol.for("EmailQueue"),
   FileParser: Symbol.for("FileParser"),
   JwtService: Symbol.for("JwtService"),
   CsrfService: Symbol.for("CsrfService"),
   CookieService: Symbol.for("CookieService"),
   HashService: Symbol.for("HashService"),
+  EmailService: Symbol.for("EmailService"),
 };

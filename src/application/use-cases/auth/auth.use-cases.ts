@@ -11,6 +11,9 @@ import { IAuditLogRepository } from "../../../domain/interfaces/audit-log-reposi
 import { IJwtService } from "../../ports/jwt.port";
 import { ICsrfService } from "../../ports/csrf.port";
 import { IHashService } from "../../ports/hash-service.port";
+import { ITransactionManager } from "../../ports/transaction-manager.port";
+import { IQueueService } from "../../ports/queue-service.port";
+import { TEmailJobData } from "../../jobs/email.jobs";
 
 export class AuthUseCases {
   constructor(
@@ -21,67 +24,81 @@ export class AuthUseCases {
     private readonly jwtService: IJwtService,
     private readonly csrfService: ICsrfService,
     private readonly hashService: IHashService,
+    private readonly transactionManager: ITransactionManager,
+    private readonly emailQueueService: IQueueService<TEmailJobData>,
   ) {}
 
   registerUseCase = async (data: TRegisterCommand) => {
-    const existingUser = await this.userRepository.findByEmail(data.email);
-    if (existingUser) {
-      throw new AppError("Email already exists", 409);
-    }
+    const user = await this.transactionManager.runInTransaction(async () => {
+      const existingUser = await this.userRepository.findByEmail(data.email);
+      if (existingUser) {
+        throw new AppError("Email already exists", 409);
+      }
 
-    const hashedPassword = await this.hashService.hashPassword(
-      data.password,
-      10,
-    );
+      const hashedPassword = await this.hashService.hashPassword(
+        data.password,
+        10,
+      );
 
-    const userData = new UserEntity({
-      id: this.hashService.randomUUID(),
-      email: data.email,
-      password: hashedPassword,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      isActive: false,
-      tokenVersion: 0,
-      role: data.role,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      const userData = new UserEntity({
+        id: this.hashService.randomUUID(),
+        email: data.email,
+        password: hashedPassword,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        isActive: false,
+        tokenVersion: 0,
+        role: data.role,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const user = await this.userRepository.save(userData);
+
+      const familyId = this.hashService.randomTokenId();
+
+      const accessToken = this.jwtService.signAccessToken(user);
+
+      const refreshToken = this.jwtService.signRefreshToken(user, familyId);
+
+      const hashToken = this.hashService.hashToken(refreshToken);
+
+      const csrfToken = this.csrfService.generateToken(familyId);
+
+      const refreshTokenEntity = new TokenEntity({
+        id: this.hashService.randomUUID(),
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        familyId,
+        ipAddress: data.ipAddress ?? null,
+        userAgent: data.userAgent ?? null,
+        tokenHash: hashToken,
+        replacedBy: null,
+        revokedAt: null,
+      });
+
+      await this.tokenRepository.save(refreshTokenEntity);
+
+      return {
+        familyId,
+        user,
+        csrfToken,
+        accessToken,
+        refreshToken,
+      };
     });
 
-    const user = await this.userRepository.save(userData);
-
-    const familyId = this.hashService.randomTokenId();
-
-    const accessToken = this.jwtService.signAccessToken(user);
-
-    const refreshToken = this.jwtService.signRefreshToken(user, familyId);
-
-    const hashToken = this.hashService.hashToken(refreshToken);
-
-    const csrfToken = this.csrfService.generateToken(familyId);
-
-    const refreshTokenEntity = new TokenEntity({
-      id: this.hashService.randomUUID(),
-      userId: user.id,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      familyId,
-      ipAddress: data.ipAddress ?? null,
-      userAgent: data.userAgent ?? null,
-      tokenHash: hashToken,
-      replacedBy: null,
-      revokedAt: null,
+    await this.emailQueueService.add("WELCOME_EMAIL", {
+      type: "WELCOME_EMAIL",
+      to: data.email,
+      payload: {
+        name: data.firstName + " " + data.lastName,
+      },
     });
 
-    await this.tokenRepository.save(refreshTokenEntity);
-
-    return {
-      familyId,
-      user,
-      csrfToken,
-      accessToken,
-      refreshToken,
-    };
+    return user;
   };
 
   loginUseCase = async (data: TLoginCommand) => {
